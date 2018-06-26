@@ -14,11 +14,11 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
-$app->group(['namespace' => 'Api'], function($app) {
-    $app->post('/login/pwd','LoginController@pwdlogin');
-    $app->post('/login/verify','LoginController@verifylogin');
-    $app->post('/login/wechat','LoginController@wechatlogin');
-    $app->post('/login/weibo','LoginController@weibologin');
-    $app->post('/login/qq','LoginController@qqlogin');
-    $app->post('/login/github','LoginController@githublogin');
+$router->group(['namespace' => 'Api'], function($router) {
+    $router->post('/login/pwd','LoginController@pwdlogin');
+    $router->post('/login/verify','LoginController@verifylogin');
+    $router->post('/login/wechat','LoginController@wechatlogin');
+    $router->post('/login/weibo','LoginController@weibologin');
+    $router->post('/login/qq','LoginController@qqlogin');
+    $router->post('/login/github','LoginController@githublogin');
 });
