@@ -86,7 +86,7 @@ $app->routeMiddleware([
 $app->configure('C');
 $app->configure('database');
 //增加邮件发送
-$app->configure('mail');
+//$app->configure('mail');
 $app->configure('wechat');
 $app->configure('session');
 $app->register(Illuminate\Session\SessionServiceProvider::class);
@@ -95,9 +95,6 @@ $app->register(Illuminate\Session\SessionServiceProvider::class);
 $app->register(Illuminate\Redis\RedisServiceProvider::class);
 // class_alias('Illuminate\Support\Facades\Mail', 'Mail');
 $app->alias('session', 'Illuminate\Session\SessionManager');
-// $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\AuthServiceProvider::class);
-// $app->register(App\Providers\EventServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
@@ -113,6 +110,7 @@ $app->alias('session', 'Illuminate\Session\SessionManager');
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {
+    require __DIR__.'/../routes/auth.php';
     require __DIR__.'/../routes/web.php';
 });
 

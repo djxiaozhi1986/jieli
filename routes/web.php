@@ -15,13 +15,6 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 $router->group(['namespace' => 'app'], function($router) {
-    //登录
-    $router->post('/login/pwd','LoginController@pwd_login');
-    $router->post('/login/verify','LoginController@verify_login');
-    $router->post('/login/wechat','LoginController@wechat_login');
-    $router->post('/login/weibo','LoginController@weibo_login');
-    $router->post('/login/qq','LoginController@qq_login');
-    $router->post('/login/github','LoginController@github_login');
     //注册
     $router->post('/register','LoginController@register');
     //发送验证码
