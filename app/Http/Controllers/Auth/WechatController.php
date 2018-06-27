@@ -13,7 +13,7 @@ use App\Modules\Live_list;
 use App\Modules\Users;
 use App\Modules\Users_vendor_login;
 use Cache;
-use EasyWeChat\OfficialAccount\Application;
+use EasyWeChat\Factory;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Crypt;
@@ -23,7 +23,8 @@ class WechatController extends Controller
 {
 
     public function create_menu(Request $request){
-        $wechat = new Application(config('wechat'));
+        $wechat = Factory::officialAccount(config('wechat'));
+//        $wechat = new Application(config('wechat'));
         $menu = $wechat->menu;
         $buttons = [
             [
@@ -47,10 +48,12 @@ class WechatController extends Controller
      */
     public function server()
     {
-        $wechat = new Application(config('wechat'));
+//        $wechat = new Application(config('wechat'));
+        $wechat = Factory::officialAccount(config('wechat'));
         $server = $wechat->server;
-        $server->setMessageHandler(function ($message) {
-            switch ($message->MsgType) {
+        $server->push(function ($message) {
+//        $server->setMessageHandler(function ($message) {
+            switch ($message['MsgType']) {
                 case 'event':
                     # 事件消息...
                     switch ($message->Event) {
@@ -99,7 +102,8 @@ class WechatController extends Controller
     }
 
     public function oauth(){
-        $wechat = new Application(config('wechat'));
+        $wechat = Factory::officialAccount(config('wechat'));
+//        $wechat = new Application(config('wechat'));
         $oauth = $wechat->oauth;
         // 未登录
         if (empty($_SESSION['wechat_user'])) {
@@ -115,7 +119,8 @@ class WechatController extends Controller
 
     public function oauth_callback(Request $request)
     {
-        $wechat = new Application(config('wechat'));
+        $wechat = Factory::officialAccount(config('wechat'));
+//        $wechat = new Application(config('wechat'));
         $oauth = $wechat->oauth;
         // 获取 OAuth 授权结果用户信息
         $user = $oauth->user()->toArray();
