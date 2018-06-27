@@ -52,49 +52,33 @@ class WechatController extends Controller
         $wechat = Factory::officialAccount(config('wechat'));
         $server = $wechat->server;
         $server->push(function ($message) {
-//        $server->setMessageHandler(function ($message) {
             switch ($message['MsgType']) {
                 case 'event':
-                    # 事件消息...
-                    switch ($message->Event) {
-                        case 'subscribe':
-                            # code...
-                            return "您好！欢迎关注NCAI运营平台!";
-                            break;
-                        default:
-                            # code...
-                            return "您好！其它事件!";
-                            break;
-                    }
+                    return '收到事件消息';
                     break;
                 case 'text':
-                    # 文字消息...
-                    return "您好！您发的是文字消息!";
+                    return '收到文字消息';
                     break;
                 case 'image':
-                    # 图片消息...
-                    return "您好！您发的是图片消息!";
+                    return '收到图片消息';
                     break;
                 case 'voice':
-                    # 语音消息...
-                    return "您好！您发的是语音消息!";
+                    return '收到语音消息';
                     break;
                 case 'video':
-                    # 视频消息...
-                    return "您好！您发的是视频消息!";
+                    return '收到视频消息';
                     break;
                 case 'location':
-                    # 坐标消息...
-                    return "您好！您发的是坐标消息!";
+                    return '收到坐标消息';
                     break;
                 case 'link':
-                    # 链接消息...
-                    return "您好！您发的是链接消息!";
+                    return '收到链接消息';
                     break;
+                case 'file':
+                    return '收到文件消息';
                 // ... 其它消息
                 default:
-                    # code...
-                    return "您好！不太确定您发的是什么!";
+                    return '收到其它消息';
                     break;
             }
         });
