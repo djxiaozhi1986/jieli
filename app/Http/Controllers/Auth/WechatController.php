@@ -53,7 +53,7 @@ class WechatController extends Controller
         $server = $wechat->server;
         $server->push(function ($message) {
 //        $server->setMessageHandler(function ($message) {
-            switch ($message['MsgType']) {
+            switch ($message->MsgType) {
                 case 'event':
                     # 事件消息...
                     switch ($message->Event) {
