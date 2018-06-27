@@ -13,7 +13,7 @@ use App\Modules\Live_list;
 use App\Modules\Users;
 use App\Modules\Users_vendor_login;
 use Cache;
-use EasyWeChat\OpenPlatform\Application;
+use EasyWeChat\OfficialAccount\Application;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Crypt;
