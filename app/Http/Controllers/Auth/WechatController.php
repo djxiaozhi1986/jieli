@@ -6,7 +6,6 @@
  * Time: 下午6:00
  */
 namespace App\Http\Controllers\Auth;
-use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Controller;
 use App\libraries\Generate;
 use App\Modules\Company_info;
@@ -14,8 +13,9 @@ use App\Modules\Live_list;
 use App\Modules\Users;
 use App\Modules\Users_vendor_login;
 use Cache;
+use EasyWeChat\OpenPlatform\Application;
 use Illuminate\Http\Request;
-use EasyWeChat\Foundation\Application;
+
 use Illuminate\Support\Facades\Crypt;
 use Log;
 
