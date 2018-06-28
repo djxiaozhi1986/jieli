@@ -106,7 +106,11 @@ $app->alias('session', 'Illuminate\Session\SessionManager');
 | can respond to, as well as the controllers that may handle them.
 |
 */
-
+$app->configureMonologUsing(function(Monolog\Logger $monoLog) use ($app){
+    return $monoLog->pushHandler(
+        new \Monolog\Handler\RotatingFileHandler($app->storagePath().'/logs/'.env('LOG_PREFIX').'.log',20)
+    );
+});
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {
