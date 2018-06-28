@@ -28,13 +28,13 @@ class WechatController extends Controller
         $buttons = [
             [
                 "type" => "view",
-                "name" => "NCAI",
-                "url"  => "http://ncai.netconcepts.cn/"
+                "name" => "天鹅阅读",
+                "url"  => "http://rd.swanreads.com"
             ],
             [
                 "type" => "view",
-                "name" => "智能审批",
-                "url"  => "http://appr.netconcepts.cn/"
+                "name" => "个人中心",
+                "url"  => "http://rd.swanreads.com/userinfo"
             ],
         ];
         $menu->create($buttons);
