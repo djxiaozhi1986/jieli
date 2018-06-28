@@ -44,7 +44,7 @@ class WechatController extends Controller
      *
      * @return string
      */
-    public function server()
+    public function server(Request $request)
     {
 //        $wechat = new Application(config('wechat'));
         $wechat = Factory::officialAccount(config('wechat'));
@@ -84,7 +84,7 @@ class WechatController extends Controller
         return $server->serve();
     }
 
-    public function oauth(){
+    public function oauth(Request $request){
         $wechat = Factory::officialAccount(config('wechat'));
 //        $wechat = new Application(config('wechat'));
         $oauth = $wechat->oauth;
