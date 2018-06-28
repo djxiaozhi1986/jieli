@@ -35,18 +35,18 @@ class LoginController extends Controller{
             //验证验证码
             if ($u_random == $random || $u_random == 1234) {
                 Cache::pull($u_phone);
-                $phone = User_vendor_login::leftJoin('users as u', 'user_vendor_login.user_id', '=', 'u.user_id')
+                $phone = User_vendor_login::leftJoin('users as u', 'users_vendor_login.user_id', '=', 'u.user_id')
                     ->select('user_phone')
-                    ->where('user_vendor_login.user_id',$u_id)
+                    ->where('users_vendor_login.user_id',$u_id)
                     ->first();
 
-                if (empty($phone['user_phone'])) {
-                    $arr = Users::select('user_phone')
-                        ->where(['is_bound' => 1, 'user_phone' => $u_phone])
+                if (empty($phone['phone'])) {
+                    $arr = Users::select('phone')
+                        ->where(['is_bound' => 1, 'phone' => $u_phone])
                         ->first();
                     if (!empty($arr)) return response()->json(['dec' => $this->be_bound_err]);
                     //第三方登录绑定手机号
-                    $res = Users::where('user_id', $u_id)->update(['user_phone' => $u_phone, 'is_bound' => 1, 'user_lastlogin_time' => time()]);
+                    $res = Users::where('user_id', $u_id)->update(['phone' => $u_phone, 'is_bound' => 1, 'user_lastlogin_time' => time()]);
                     if (empty($res)) return response()->json(['dec' => $this->error]);
                     return response()->json(['dec' => $this->success]);
                 } else {

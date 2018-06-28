@@ -123,9 +123,6 @@ class WechatController extends Controller
         $user_id = null;
         if (!$exists) {
             //添加到数据库
-            $generate = new Generate();
-            $u_token = $generate->create_token();
-            $u_token_expire = time() + (7 * 24 * 3600);
             //创建用户
             $generate = new Generate();
             $u_token = $generate->create_token();

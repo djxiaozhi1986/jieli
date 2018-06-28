@@ -42,7 +42,7 @@ class IndexController extends Controller
     }
     public function userinfo(Request $request){
         //获取用信息
-        $user = $_SESSION['wechat_user'];
+        $user = app('session')->get('wechat_user');
         var_dump($user);
         return view('wechat/userinfo');
     }
