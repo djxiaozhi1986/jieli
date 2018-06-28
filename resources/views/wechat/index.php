@@ -7,10 +7,10 @@
 <!--    <link rel=icon href=/resources/assets/wechat/static/images/favicon.ico>-->
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js" type="text/javascript" charset="utf-8"></script>
     <script type="text/javascript" charset="utf-8">
-        wx.config(<?php echo $app->jssdk->buildConfig(array('onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQZone'), true) ?>);
+        wx.config(<?php echo $js->buildConfig(array('onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQZone'), true) ?>);
     </script>
     <script type="text/javascript" charset="utf-8">
-        wx.config(<?php echo $js->buildConfig(array('onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQZone'), false) ?>);
+        //wx.config(<?php //echo $js->buildConfig(array('onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQZone'), false) ?>//);
         //wx.ready(function(){
         //    wx.onMenuShareQQ({
         //        <?php //echo $share_str; ?>
