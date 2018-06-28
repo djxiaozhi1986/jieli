@@ -147,7 +147,7 @@ class WechatController extends Controller
                 'user_nickname' => $user['nickname'],
                 'user_sex' => $user['original']['sex'],
                 'user_logintype' => 3,
-                'unionid' => $token['unionid']
+//                'unionid' => $token['unionid']
             ]);
         }else{
             $vendor_login_id=$exists->vendor_id;
