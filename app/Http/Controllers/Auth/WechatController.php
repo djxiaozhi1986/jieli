@@ -133,9 +133,10 @@ class WechatController extends Controller
             $user_id = Users::insertGetId([
                 'user_token' => $u_token,
                 'user_token_expire' => $u_token_expire,
-                'user_first_head' => $user['avatar'],
-                'user_first_nickname' => $user['nickname'],
-                'user_regtime' => time(),
+                'avator' => $user['avatar'],
+                'nickname' => $user['nickname'],
+                'created_at' => time(),
+                'updated_at' => time(),
                 'is_bound' => 0
             ]);
             User_vendor_login::insert([
