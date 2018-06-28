@@ -15,6 +15,7 @@ $router->group(['namespace' => 'Auth'], function($router) {
 
     $router->post('/oauth/wechat/create_menu','WechatController@create_menu');
     $router->get('/oauth/wechat/server', 'WechatController@server');
+    $router->post('/oauth/wechat/server', 'WechatController@server');
     $router->get('/oauth/wechat/vendor_login', ['middleware' => 'wechat.oauth','uses'=>'WechatController@vendor_login']);
     $router->get('/oauth/wechat/oauth_callback', 'WechatController@oauth_callback');
     //登录
