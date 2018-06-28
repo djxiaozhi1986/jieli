@@ -13,6 +13,7 @@ $router->group(['namespace' => 'Auth'], function($router) {
 //    $app->get('/oauth/create_menu', 'WechatController@create_menu');
 
 
+    $router->post('/oauth/wechat/create_menu','WechatController@create_menu');
     $router->get('/oauth/wechat/server', 'WechatController@server');
     //登录
 //    $router->post('/oauth/pwd','LoginController@pwd_login');
