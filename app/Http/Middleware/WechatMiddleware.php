@@ -8,7 +8,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use EasyWeChat\Foundation\Application;
+use EasyWeChat\Factory;
 
 class WechatMiddleware
 {
@@ -32,7 +32,7 @@ class WechatMiddleware
                 // 未登录
                 $options = config('wechat');
                 $options['oauth']['callback'] = $options['oauth']['callback'] . '?target_url=' . $request->getRequestUri();
-                $wechat = new Application($options);
+                $wechat = Factory::officialAccount($options);
                 $oauth = $wechat->oauth;
                 return $oauth->redirect();
             }
