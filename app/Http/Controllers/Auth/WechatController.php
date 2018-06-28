@@ -49,7 +49,7 @@ class WechatController extends Controller
     {
         $wechat = Factory::officialAccount(config('wechat'));
         $server = $wechat->server;
-        $server->push(MessageHandler::class,'*');
+        $server->push(MessageHandler::class);
 //        $server->push(function ($message) {
 //            switch ($message['MsgType']) {
 //                case 'event':
