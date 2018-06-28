@@ -6,6 +6,7 @@
  * Time: 下午6:00
  */
 namespace App\Http\Controllers\Auth;
+use App\Handler\Wechat\MessageHandler;
 use App\Http\Controllers\Controller;
 use App\libraries\Generate;
 use App\Modules\Company_info;
@@ -14,6 +15,7 @@ use App\Modules\Users;
 use App\Modules\Users_vendor_login;
 use Cache;
 use EasyWeChat\Factory;
+use EasyWeChat\Kernel\Messages\Message;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Crypt;
@@ -46,41 +48,9 @@ class WechatController extends Controller
      */
     public function server(Request $request)
     {
-//        $wechat = new Application(config('wechat'));
         $wechat = Factory::officialAccount(config('wechat'));
         $server = $wechat->server;
-        $server->push(function ($message) {
-            Log::info($message);
-            switch ($message['MsgType']) {
-                case 'event':
-                    return '收到事件消息';
-                    break;
-                case 'text':
-                    return '收到文字消息';
-                    break;
-                case 'image':
-                    return '收到图片消息';
-                    break;
-                case 'voice':
-                    return '收到语音消息';
-                    break;
-                case 'video':
-                    return '收到视频消息';
-                    break;
-                case 'location':
-                    return '收到坐标消息';
-                    break;
-                case 'link':
-                    return '收到链接消息';
-                    break;
-                case 'file':
-                    return '收到文件消息';
-                // ... 其它消息
-                default:
-                    return '收到其它消息';
-                    break;
-            }
-        });
+        $server->push(MessageHandler::class,'*');
         return $server->serve();
     }
 
