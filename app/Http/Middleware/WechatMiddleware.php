@@ -22,7 +22,7 @@ class WechatMiddleware
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        if (strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') === false  && strpos($_SERVER['HTTP_USER_AGENT'], 'Weibo') === false) {
+        if (strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') === false) {
             echo '请从微信客户端打开本页面!';
             return;
         }

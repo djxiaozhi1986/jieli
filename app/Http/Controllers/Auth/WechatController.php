@@ -30,7 +30,7 @@ class WechatController extends Controller
             [
                 "type" => "view",
                 "name" => "天鹅阅读",
-                "url"  => "http://rd.swanreads.com"
+                "url"  => "http://jlapi.kakusoft.com/oauth/wechat/vendor_login"
             ],
             [
                 "type" => "view",
@@ -151,6 +151,7 @@ class WechatController extends Controller
         echo "window.location.href='$targetUrl'";
         echo "</script>";
     }
+    //微信三方登录
     public function vendor_login(Request $request){
         $t = $request['t'].'/login';
         $wehcat_user = app('session')->get('wechat_user');
