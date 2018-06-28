@@ -32,7 +32,7 @@
 </head>
 <body>
 <div id=app>
-    <app></app>
+    <app>天鹅阅读</app>
 </div>
 </body>
 </html>

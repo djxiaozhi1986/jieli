@@ -40,4 +40,10 @@ class IndexController extends Controller
         return view('wechat/index',['js'=>$js, 'share_str'=>$share_str]);
 //        var_dump($share_str);
     }
+    public function userinfo(Request $request){
+        //获取用信息
+        $user = session('wechat_user');
+        var_dump($user);
+        return view('wechat/userinfo');
+    }
 }

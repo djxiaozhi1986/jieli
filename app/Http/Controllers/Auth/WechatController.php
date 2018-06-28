@@ -30,12 +30,12 @@ class WechatController extends Controller
             [
                 "type" => "view",
                 "name" => "天鹅阅读",
-                "url"  => "http://jlapi.kakusoft.com/oauth/wechat/vendor_login"
+                "url"  => "http://jlapi.kakusoft.com/web/wechat/index"
             ],
             [
                 "type" => "view",
                 "name" => "个人中心",
-                "url"  => "http://rd.swanreads.com/userinfo"
+                "url"  => "http://jlapi.kakusoft.com/web/wechat/userinfo"
             ],
         ];
         $menu->create($buttons);
@@ -126,13 +126,27 @@ class WechatController extends Controller
             $generate = new Generate();
             $u_token = $generate->create_token();
             $u_token_expire = time() + (7 * 24 * 3600);
-            $vendor_login_id = Users_vendor_login::insertGetId([
+            //创建用户
+            $generate = new Generate();
+            $u_token = $generate->create_token();
+            $u_token_expire = time() + (7 * 24 * 3600);
+            $user_id = Users::insertGetId([
+                'user_token' => $u_token,
+                'user_token_expire' => $u_token_expire,
+                'user_first_head' => $user['avatar'],
+                'user_first_nickname' => $user['nickname'],
+                'user_regtime' => time(),
+                'is_bound' => 0
+            ]);
+            User_vendor_login::insert([
+                'user_id' => $user_id,
                 'user_head' => $user['avatar'],
                 'open_id' => $user['id'],
                 'access_token' => $token['access_token'],
                 'user_nickname' => $user['nickname'],
                 'user_sex' => $user['original']['sex'],
-                'user_logintype' => 3
+                'user_logintype' => 3,
+                'unionid' => $token['unionid']
             ]);
         }else{
             $vendor_login_id=$exists->vendor_id;
@@ -176,54 +190,6 @@ class WechatController extends Controller
             }
         }
         return view('vendor_bound/wechat',['vendor_login_id'=>$vendor_login_id, 't'=>$t]);
-    }
-    public function vendor_bound(Request $request)
-    {
-        $admin_user = $request['username'];
-        $admin_pass = $request['password'];
-
-        //加密密码
-        //$admin_pass = Hash::make($admin_pass);
-        $user = Users::leftJoin('companys', 'users.company_id', '=', 'companys.company_id')
-            ->select('users.user_id', 'users.username', 'users.password', 'users.dept_id', 'position', 'users.company_id', 'companys.company_name', 'users.role_id', 'users.gender', 'users.email', 'users.realname', 'users.flag_job', 'users.hire_date',
-                'users.become_date', 'users.now_addr', 'users.household_addr', 'users.birth_date', 'users.tel', 'users.photo', 'users.last_time', 'users.last_ip', 'users.create_time', 'users.status')
-            ->where('username', $admin_user)
-            ->first();
-        if (!empty($user)) {
-            $checked = $admin_pass == $user['password'];
-            if ($checked) {
-                if ($user->status == 1) {
-                    if ($user->flag_job == 1) {
-                        //绑定三方登录
-                        if (isset($request['vendor_login_id'])) {
-                            $vendor_user = Users_vendor_login::where('vendor_id', $request['vendor_login_id'])->first();
-                            if ($vendor_user) {
-                                $save_vendor_data['user_id'] = $user->user_id;
-                                $res = Users_vendor_login::where('vendor_id', $request['vendor_login_id'])->update($save_vendor_data);
-                                $t = $request['t'];
-                                $token =Crypt::encrypt($user->user_id);
-                                $targetUrl=$t;
-                                if(strpos($t,"?")>0){
-                                    $targetUrl .= '&token='.$token.'&vendor_login_success=1';
-                                }else{
-                                    $targetUrl .= '?token='.$token.'&vendor_login_success=1';;
-                                }
-                                $code = array('dec' => $this->success, 'targetUrl' => $targetUrl);
-                            }
-                        }
-                    } else {
-                        $code = array('dec' => $this->login_flag_job_err);
-                    }
-                } else {
-                    $code = array('dec' => $this->login_status_err);
-                }
-            } else {
-                $code = array('dec' => $this->login_upass_err);
-            }
-        } else {
-            $code = array('dec' => $this->login_uname_err);
-        }
-        return response()->json($code);
     }
     public function test_short_url(Request $request){
         $wechat = new Application(config('wechat'));
