@@ -139,7 +139,7 @@ class WechatController extends Controller
                 'updated_at' => time(),
                 'is_bound' => 0
             ]);
-            User_vendor_login::insert([
+            Users_vendor_login::insert([
                 'user_id' => $user_id,
                 'user_head' => $user['avatar'],
                 'open_id' => $user['id'],
