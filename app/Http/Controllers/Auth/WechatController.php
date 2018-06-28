@@ -24,7 +24,6 @@ class WechatController extends Controller
 
     public function create_menu(Request $request){
         $wechat = Factory::officialAccount(config('wechat'));
-//        $wechat = new Application(config('wechat'));
         $menu = $wechat->menu;
         $buttons = [
             [
@@ -38,8 +37,7 @@ class WechatController extends Controller
                 "url"  => "http://appr.netconcepts.cn/"
             ],
         ];
-//        var_dump($current);die;
-        $menu->add($buttons);
+        $menu->create($buttons);
     }
     /**
      * 处理微信的请求消息
