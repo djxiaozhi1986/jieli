@@ -22,21 +22,22 @@ use Log;
 class IndexController extends Controller
 {
     public function index(Request $request){
+        $url = $request->url();
         $wechat = Factory::officialAccount(config('wechat'));
-        $js = $wechat->js;
-        
-        $desc = '非常不错!快来围观吧~';
+        $js = $wechat->jssdk;
         $share_str = "
             title: '我正在观看',
-            link: 'http://jlapi.kakusoft.com/web/wechat/index',
+            link: '$url',
             imgUrl: 'http://jlapi.kakusoft.com/logo.png',
-            desc: '$desc',
+            desc: '非常不错!快来围观吧~',
             success: function () {
 
             },
             cancel: function () {
 
             }";
-        var_dump($share_str);
+//        $js->buildConfig(array('onMenuShareQQ', 'onMenuShareWeibo'),true,false,$share_str);
+        return view('wechat/index',['js'=>$js, 'share_str'=>$share_str]);
+//        var_dump($share_str);
     }
 }
