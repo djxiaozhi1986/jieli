@@ -42,7 +42,17 @@ class IndexController extends Controller
     }
     public function userinfo(Request $request){
         //获取用信息
-        $user = app('session')->get('wechat_user');
+        $user=array();
+        $wechat_user = app('session')->get('wechat_user');
+        if($wechat_user){
+            if($wechat_user['vendor_login_id']){
+                $vendor = Users_vendor_login::where('vendor_id',$wechat_user['vendor_login_id'])->first();
+                if($vendor){
+                    $user['vendor'] = $vendor;
+                    $user['info'] = Users::where('user_id',$vendor->user_id)->first();
+                }
+            }
+        }
         var_dump($user);
         return view('wechat/userinfo');
     }
