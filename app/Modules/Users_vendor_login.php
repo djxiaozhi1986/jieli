@@ -11,7 +11,7 @@ namespace App\Modules;
 use Illuminate\Database\Eloquent\Model;
 
 /*
- * 用户表
+ * 三方登录用户表
  */
 
 class Users_vendor_login extends Model

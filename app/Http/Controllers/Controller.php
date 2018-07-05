@@ -22,6 +22,12 @@ class Controller extends BaseController
     protected $login_user_role_err = array('code' => '060013', 'msg' => '该用户未设置权限，无法登录');
     protected $operation_err = array('code' => '060014', 'msg' => '操作过于频繁');
     protected $user_exist_err = array('code' => '060015', 'msg' => '手机号已被注册');
+    protected $course_disable_err = array('code' => '060016', 'msg' => '该课程无法查看');
+    protected $course_close_err = array('code' => '060017', 'msg' => '该课程已经关闭');
+    protected $course_nothing_err = array('code' => '060018', 'msg' => '不存在的课程');
+    protected $praise_err = array('code' => '060019', 'msg' => '已经赞过，不可重复点赞');
+    protected $http_file_err = array('code' => '060020', 'msg' => '没找到上传文件');
+    protected $http_mime_err = array('code' => '060021', 'msg' => '上传文件格式有误');
 
     public function create_token()
     {
@@ -30,5 +36,19 @@ class Controller extends BaseController
         //加密token
         $token = sha1(md5($token));
         return $token;
+    }
+
+    /*
+     * 检查图片Mime是否合法
+     * author   xx    2016年9月21日14:31:59
+     *
+     */
+    public function _isImg($fileType)
+    {
+        $type = array("jpeg", "gif", "jpg", "png");
+        $fileType = strtolower($fileType);
+        $fileArray = explode("/", $fileType);
+        $file_type = end($fileArray);
+        return in_array($file_type, $type);
     }
 }

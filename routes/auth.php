@@ -18,6 +18,9 @@ $router->group(['namespace' => 'Auth'], function($router) {
     $router->post('/oauth/wechat/server', 'WechatController@server');
     $router->get('/oauth/wechat/vendor_login', ['middleware' => 'wechat.oauth','uses'=>'WechatController@vendor_login']);
     $router->get('/oauth/wechat/oauth_callback', 'WechatController@oauth_callback');
+
+    //发送验证码
+    $router->post('/sendcode','LoginController@verif');
     //注册
     $router->post('/oauth/register','LoginController@register');
     //登录
@@ -27,4 +30,6 @@ $router->group(['namespace' => 'Auth'], function($router) {
 //    $router->post('/oauth/weibo','LoginController@weibo_login');
 //    $router->post('/oauth/qq','LoginController@qq_login');
 //    $router->post('/oauth/github','LoginController@github_login');
+    //绑定手机
+    $router->post('/bind','LoginController@bind');
 });

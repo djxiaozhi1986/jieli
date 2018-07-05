@@ -40,7 +40,7 @@ class LoginController extends Controller{
                     //创建用户
                     $savedata['phone'] = $savedata['username'] = $u_phone;
                     $savedata['password'] = md5(md5($u_pwd));
-                    $savedata['avator'] = "";//默认头像
+                    $savedata['avator'] = config('C.DEFAULT_AVATOR');//默认头像
                     $savedata['user_token'] = $this->create_token();
                     $savedata['user_token_expire'] = time() + (7 * 24 * 3600);
                     $savedata['created_at'] = time();
@@ -97,7 +97,7 @@ class LoginController extends Controller{
                     $u_token = $user->user_token;
                     $u_token_expire = $user->user_token_expire;
                     $u_nickname = $user->nickname;
-                    $u_avator = $user->avator;
+                    $u_avator = config('C.DOMAIN').$user->avator;
                     $u_phone = $user->phone;
                     $code = array('data' => array('u_id' => $user_id, 'u_token' => $u_token,'u_token_expire'=>$u_token_expire, 'u_nickname' => $u_nickname, 'u_head' => $u_avator, 'u_phone' => $u_phone), 'dec' => $this->success);
                 } else {
@@ -189,7 +189,8 @@ class LoginController extends Controller{
                     $u_token = $u_info->user_token;
                     $u_token_expire = $u_info->user_token_expire;
                     $u_nickname = $u_info->nickname;
-                    $u_avator = $u_info->avator;
+//                    $u_avator = $u_info->avator;
+                    $u_avator = config('C.DOMAIN').$u_info->avator;
                     $u_phone = $u_info->phone;
                     //token过期
                     if (time() > $u_token_expire) {
@@ -208,7 +209,7 @@ class LoginController extends Controller{
                 } else if (empty($u_info)) {
                     //注册用户
 //                    $u_avator="uploads/2016/11/1/head_normal.png";//默认头像
-                    $u_avator="";//默认头像
+                    $u_avator=config('C.DEFAULT_AVATOR');//默认头像
                     $u_token = $this->create_token();
                     $u_token_expire = time() + (7 * 24 * 3600);
                     $user_id = Users::insertGetId(['username'=>$u_phone,'phone' => $u_phone, 'user_token' => $u_token, 'user_token_expire' => $u_token_expire, 'device_type' => $u_device_type, 'created_at' =>time(), 'is_bound' => 1,'avator'=>$u_avator]);
