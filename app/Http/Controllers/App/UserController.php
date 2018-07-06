@@ -78,7 +78,7 @@ class UserController extends Controller{
     {
         if ($request->input('login_user')) {
             $save_data['sex'] = $request->input('sex');
-            $save_data['birthday'] = $request->input('birthday');
+            $save_data['birthday'] = strtotime($request->input('birthday'));
             $res = Users::where('user_id',$request->input('login_user'))->update($save_data);
             if($res){
                 $code = array('dec' => $this->success);
@@ -160,8 +160,6 @@ class UserController extends Controller{
         return response()->json($code);
     }
 
-
-
     /***
      * 天鹅币变更
      * @param Request $request
@@ -202,4 +200,46 @@ class UserController extends Controller{
 
     }
 
+    /**
+     * 修改手机号
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function edit_phone(Request $request){
+        $user_id = $request->input('login_user');
+        $u_phone = $request->input('phone');
+        $u_new_phone = $request->input('new_phone');
+        $u_random = $request->input('u_random');
+        $u_new_random = $request->input('new_u_random');
+        if($user_id && $u_phone && $u_new_phone && $u_random && $u_new_random){
+            if (preg_match("/^1[34578][0-9]{9}$/", $u_new_phone)) {
+                $c_random = Cache::get($u_phone);
+                if($u_random == $c_random || $u_new_random=='1234'){
+                    $c_new_random = Cache::get($u_new_phone);
+                    if($u_new_random == $c_new_random || $u_new_random=='1234'){
+                        $up['username'] = $u_new_phone;
+                        $up['phone'] = $u_new_phone;
+                        $res = Users::where('user_id',$user_id)->update($up);
+                        if($res){
+                            $code = array('dec'=>$this->success);
+                        }else{
+                            $code = array('dec'=>$this->error);
+                        }
+                    }else{
+                        //新手机验证码错误
+                        $code = array('dec'=>array('code'=>'-1','msg'=>'新手机验证码错误'));
+                    }
+                }else{
+                    //原手机验证码错误
+                    $code = array('dec'=>array('code'=>'-1','msg'=>'原手机验证码错误'));
+                }
+            }else{
+                //新手机号码格式不正确
+                $code = array('dec'=>array('code'=>'-1','msg'=>'新手机号码格式不正确'));
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
 }

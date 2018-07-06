@@ -28,6 +28,11 @@ class Controller extends BaseController
     protected $praise_err = array('code' => '060019', 'msg' => '已经赞过，不可重复点赞');
     protected $http_file_err = array('code' => '060020', 'msg' => '没找到上传文件');
     protected $http_mime_err = array('code' => '060021', 'msg' => '上传文件格式有误');
+    protected $order_repeat_err = array('code' => '060022', 'msg' => '已经购买过该课程，无需再次购买');
+    protected $cart_repeat_err = array('code' => '060023', 'msg' => '购物车中已经存在该课程，请到购物车中结算');
+    protected $not_sufficient_funds_err = array('code' => '060024', 'msg' => '天鹅币余额不足，请充值或更换其他支付方式');
+    protected $pay_repeat_err = array('code' => '060025', 'msg' => '已完成支付，无需重复支付');
+    protected $pay_repeat_err1 = array('code' => '060026', 'msg' => '订单已取消');
 
     public function create_token()
     {

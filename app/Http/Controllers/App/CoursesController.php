@@ -8,11 +8,14 @@
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Carts;
 use App\Modules\Comments;
 use App\Modules\Courses;
 use App\Modules\Favorites;
+use App\Modules\Foots;
 use App\Modules\Lecturers;
 use App\Modules\Praises;
+use App\Modules\Users_courses_relation;
 use Illuminate\Http\Request;
 
 class CoursesController extends Controller{
@@ -149,8 +152,6 @@ class CoursesController extends Controller{
         }
         return response()->json($code);
     }
-
-
 
     /***
      * 获取微课评论列表(N条)
@@ -296,7 +297,6 @@ class CoursesController extends Controller{
         return response()->json($code);
     }
 
-
     /***
      * 从收藏列表中移除
      * @param Request $request
@@ -330,10 +330,81 @@ class CoursesController extends Controller{
                     ->leftJoin('courses','courses.course_id','favorites.course_id');
 
             $total = $sql->count();
-            $list = $sql->select('courses.title','courses.description','courses.lecturer_name','courses.cover','courses.old_price','courses.now_price','courses.created_at','courses.opened_at','courses.closed_at')
+            $list = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.old_price','courses.now_price','courses.created_at','courses.opened_at','courses.closed_at')
                     ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
 
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+
+    /***
+     * 我的购物车
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function my_cart(Request $request){
+        if($request->input('login_user')){
+            $page_index = $request->input('page_index')??1;//页码
+            $page_number = $request->input('page_number')??10;//每页显示
+            $sql = Carts::where('carts.user_id',$request->input('login_user'));
+            $total = $sql->count();
+            $result = $sql->where('courses.status',1)->orderBy('carts.add_time','desc')
+                ->leftJoin('courses','courses.course_id','carts.course_id')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','carts.add_time')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+
+            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
+            return response()->json($code);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+
+    /***
+     * 添加到购物车
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function add_to_cart(Request $request){
+        if($request->input('login_user') && $request->input('course_id')){
+            $exists = Carts::where('user_id',$request->input('login_user'))->where('course_id',$request->input('course_id'))->exists();
+            if($exists){
+                //购物车中已经存在。微课产品数量不进行递增，直接返回
+                return response()->json(array('dec' => $this->cart_repeat_err));
+            }
+            $cart['user_id'] = $request->input('login_user');
+            $cart['course_id'] = $request->input('course_id');
+            $cart['add_time'] = time();
+            $res = Carts::create($cart);
+            if($res){
+                $code= array('dec'=>$this->success);
+            }else{
+                $code= array('dec'=>$this->error);
+            }
+        }
+        else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+
+    /***
+     * 从购物车中移除
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function del_from_cart(Request $request){
+        if($request->input('course_id') && $request->input('login_user')){
+            $res = Carts::where('course_id',$request->input('course_id'))->where('user_id',$request->input('login_user'))->delete();
+            if($res){
+                $code= array('dec'=>$this->success);
+            }else{
+                $code= array('dec'=>$this->error);
+            }
         }else{
             $code = array('dec'=>$this->client_err);
         }
@@ -346,5 +417,132 @@ class CoursesController extends Controller{
             $result = Comments::where('parent_id',$parent_id)->select('content','from_user','from_user_name','to_user','to_user_name','created_at')->get()->toArray();
         }
         return $result;
+    }
+
+    /***
+     * 我的全部课程
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function my_courses(Request $request){
+        if($request->input('login_user')){
+            $page_index = $request->input('page_index')??1;//页码
+            $page_number = $request->input('page_number')??10;//每页显示
+            $sql = Users_courses_relation::where('users_courses_relation.user_id',$request->input('login_user'));
+            $total = $sql->count();
+            $result = $sql->where('courses.status',1)->orderBy('users_courses_relation.created_at','desc')
+                    ->leftJoin('courses','courses.course_id','users_courses_relation.course_id')
+                    ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','users_courses_relation.created_at')
+                    ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+
+            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
+            return response()->json($code);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    /***
+     * 直播课程
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function my_live_courses(Request $request){
+        if($request->input('login_user')){
+            $page_index = $request->input('page_index')??1;//页码
+            $page_number = $request->input('page_number')??10;//每页显示
+            $sql = Users_courses_relation::where('users_courses_relation.user_id',$request->input('login_user'));
+            $total = $sql->count();
+            $result = $sql->where('courses.status',1)->where('is_live',1)->orderBy('users_courses_relation.created_at','desc')
+                ->leftJoin('courses','courses.course_id','users_courses_relation.course_id')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','users_courses_relation.created_at')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+
+            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
+            return response()->json($code);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    /***
+     * 精品课程
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function my_good_courses(Request $request){
+        if($request->input('login_user')){
+            $page_index = $request->input('page_index')??1;//页码
+            $page_number = $request->input('page_number')??10;//每页显示
+            $sql = Users_courses_relation::where('users_courses_relation.user_id',$request->input('login_user'));
+            $total = $sql->count();
+            $result = $sql->where('courses.status',1)->where('is_good',1)->orderBy('users_courses_relation.created_at','desc')
+                ->leftJoin('courses','courses.course_id','users_courses_relation.course_id')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','users_courses_relation.created_at')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+
+            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
+            return response()->json($code);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+
+    /***
+     * 添加足迹
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function add_foots(Request $request){
+        if($request->input('course_id') && $request->input('login_user')){
+            $foot['user_id'] = $request->input('login_user');
+            $foot['course_id'] = $request->input('course_id');
+            $foot['in_time'] = time();
+            $foot_id = Foots::insertGetId($foot);
+            if($foot_id){
+                $code= array('dec'=>$this->success,'data'=>$foot_id);
+            }else{
+                $code= array('dec'=>$this->error);
+            }
+            return response()->json($code);
+        }
+    }
+
+
+    /***
+     * 离开微课详情页使用
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function foot_stay(Request $request){
+        if($request->input('foot_id')){
+            $foot = Foots::where('foot_id',$request->input('foot_id'))->first();
+            $foot->out_time = time();
+            $foot->save();
+        }
+    }
+
+    /***
+     * 我的足迹，默认最近10条
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function my_foots(Request $request){
+        if($request->input('login_user')){
+            $page_index = $request->input('page_index')??1;//页码
+            $page_number = $request->input('page_number')??10;//每页显示
+            $sql = Foots::where('foots.user_id',$request->input('login_user'));
+            $total = $sql->count();
+            $result = $sql->where('courses.status',1)->orderBy('foots.in_time','desc')
+                ->leftJoin('courses','courses.course_id','foots.course_id')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','foots.in_time')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
+            return response()->json($code);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
     }
 }
