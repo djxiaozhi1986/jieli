@@ -41,6 +41,8 @@ class CoursesController extends Controller{
         $total = $sql->count();
         $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','video_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+
+//        array_walk_recursive($list, $this->convertNull());
         foreach ($list as $key=>$value){
             //此微课的点赞数量
             $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
@@ -55,7 +57,9 @@ class CoursesController extends Controller{
             }
         }
         $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
     /***
      * 获取课程列表
@@ -92,7 +96,9 @@ class CoursesController extends Controller{
             }
         }
         $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -150,7 +156,9 @@ class CoursesController extends Controller{
         else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -186,7 +194,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -214,7 +224,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -242,7 +254,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
     /***
      * 提交评论
@@ -272,7 +286,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -294,7 +310,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -313,7 +331,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -337,7 +357,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -361,7 +383,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -389,7 +413,9 @@ class CoursesController extends Controller{
         else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -440,7 +466,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
     /***
      * 直播课程
@@ -463,7 +491,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
     /***
      * 精品课程
@@ -486,7 +516,9 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -505,7 +537,9 @@ class CoursesController extends Controller{
             }else{
                 $code= array('dec'=>$this->error);
             }
-            return response()->json($code);
+            $json_str = json_encode($code);
+            $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+            return response()->json($res_json);
         }
     }
 
@@ -543,6 +577,8 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 }

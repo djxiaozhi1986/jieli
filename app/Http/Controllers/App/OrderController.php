@@ -73,7 +73,9 @@ class OrderController extends Controller{
         }else{
             $code = array('dec' => $this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -141,7 +143,9 @@ class OrderController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***

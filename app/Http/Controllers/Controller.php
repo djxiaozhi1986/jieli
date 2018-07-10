@@ -56,4 +56,14 @@ class Controller extends BaseController
         $file_type = end($fileArray);
         return in_array($file_type, $type);
     }
+
+    /**
+     * 将Null转换成""
+     */
+    public function convertNull(& $val, $key ) {
+        if ($val === null) {
+            $val = '';
+        }
+    }
+
 }

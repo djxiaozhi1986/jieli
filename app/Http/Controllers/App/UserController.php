@@ -47,6 +47,9 @@ class UserController extends Controller{
         }else{
             $code = array('dec' => $this->client_err);
         }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
         return response()->json($code);
     }
     /***
@@ -67,7 +70,9 @@ class UserController extends Controller{
         } else {
             $code = array('dec' => $this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
     /***
      * 修改个人资料
@@ -88,7 +93,9 @@ class UserController extends Controller{
         } else {
             $code = array('dec' => $this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
     /***
      * 修改头像
@@ -126,7 +133,9 @@ class UserController extends Controller{
         }else{
             $code = array('dec' => $this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -157,7 +166,9 @@ class UserController extends Controller{
         } else {
             $code = array('dec' => $this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -188,7 +199,9 @@ class UserController extends Controller{
         } else {
             $code = array('dec' => $this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 
     /***
@@ -240,6 +253,8 @@ class UserController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
-        return response()->json($code);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 }
