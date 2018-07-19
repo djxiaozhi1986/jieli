@@ -39,7 +39,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','video_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
 
 //        array_walk_recursive($list, $this->convertNull());
@@ -80,7 +80,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','video_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
         foreach ($list as $key=>$value){
             //此微课的点赞数量
@@ -123,7 +123,7 @@ class CoursesController extends Controller{
                     $result['cover']=$course->cover;
                     $result['old_price']=$course->old_price;
                     $result['now_price']=$course->now_price;
-                    $result['video_url']=$course->video_url;
+                    $result['audio_url']=$course->audio_url;
                     $result['is_home']=$course->is_home;
                     $result['opened_at']=$course->opened_at;
                     $result['closed_at']=$course->closed_at;

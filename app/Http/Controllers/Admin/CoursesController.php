@@ -40,7 +40,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','video_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
 
 //        array_walk_recursive($list, $this->convertNull());
@@ -81,7 +81,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','video_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
         foreach ($list as $key=>$value){
             //此微课的点赞数量
@@ -124,7 +124,7 @@ class CoursesController extends Controller{
                     $result['cover']=$course->cover;
                     $result['old_price']=$course->old_price;
                     $result['now_price']=$course->now_price;
-                    $result['video_url']=$course->video_url;
+                    $result['audio_url']=$course->audio_url;
                     $result['is_home']=$course->is_home;
                     $result['opened_at']=$course->opened_at;
                     $result['closed_at']=$course->closed_at;
@@ -382,13 +382,13 @@ class CoursesController extends Controller{
      * @return [type]           [description]
      */
     public function save_course(Request $request){
-        if($request->input("title") && $request->input("description") && $request->input("lecturer_id") && $request->input("lecturer_name") && $request->input("cover") && $request->input("video_url") && $request->input('opened_at') && $request->input('closed_at')){
+        if($request->input("title") && $request->input("description") && $request->input("lecturer_id") && $request->input("lecturer_name") && $request->input("cover") && $request->input("audio_url") && $request->input('opened_at') && $request->input('closed_at')){
             $save_data['title']         = $request->input('title');
             $save_data['description']   = $request->input('description');
             $save_data['lecturer_id']   = $request->input('lecturer_id');
             $save_data['lecturer_name'] = $request->input('lecturer_name');
             $save_data['cover']         = $request->input('cover');
-            $save_data['video_url']     = $request->input('video_url');
+            $save_data['audio_url']     = $request->input('audio_url');
             $save_data['opened_at']     = $request->input('opened_at');
             $save_data['closed_at']     = $request->input('closed_at');
             if($request->input('old_price')){
@@ -397,9 +397,7 @@ class CoursesController extends Controller{
             if($request->input('now_price')){
                 $save_data['now_price'] = $request->input('now_price');
             }
-            if($request->input('is_live')){
-                $save_data['is_live'] = $request->input('is_live');
-            }
+            
             if($request->input('is_good')){
                 $save_data['is_good'] = $request->input('is_good');
             }
@@ -429,6 +427,30 @@ class CoursesController extends Controller{
     }
 
     /**
+     * 直播改为线下微课
+     * @param  Request $request [description]
+     * @return [type]           [description]
+     */
+    public function edit_course_audio(Request $request)
+    {
+        if($request->input("course_id") && $request->input("audio_url")){
+            $save_data['is_live'] = 0;
+            $save_data['audio_url'] = $request->input("audio_url");
+            $res = Courses::where('course_id',$request->input("course_id"))->update($save_data);
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec'=>$this->error);
+            }
+
+        }else{
+            $code = array('dec'=>$this->client_err); 
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+    /**
      * 修改微课状态
      * @param  Request $request [description]
      * @return [type]           [description]
@@ -437,7 +459,7 @@ class CoursesController extends Controller{
         $status = $request->input("status");
         if($request->input("course_id") && isset($status)){
             $data["status"] = status;
-            $res = Courses::where('course_id',$request->input("course_id"))->update($$data);
+            $res = Courses::where('course_id',$request->input("course_id"))->update($data);
 
             if($res){
                 $code = array('dec' => $this->success);
