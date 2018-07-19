@@ -99,7 +99,7 @@ class LoginController extends Controller{
                     $u_nickname = $user->nickname;
                     $u_avator = config('C.DOMAIN').$user->avator;
                     $u_phone = $user->phone;
-                    $code = array('data' => array('u_id' => $user_id, 'u_token' => $u_token,'u_token_expire'=>$u_token_expire, 'u_nickname' => $u_nickname, 'u_head' => $u_avator, 'u_phone' => $u_phone), 'dec' => $this->success);
+                    $code = array('data' => array('u_id' => $user_id, 'u_token' => $u_token,'u_token_expire'=>$u_token_expire, 'u_nickname' => $u_nickname, 'u_avator' => $u_avator, 'u_phone' => $u_phone), 'dec' => $this->success);
                 } else {
                     $code = array('dec' => $this->login_status_err);
                 }
@@ -215,7 +215,7 @@ class LoginController extends Controller{
                     $user_id = Users::insertGetId(['username'=>$u_phone,'phone' => $u_phone, 'user_token' => $u_token, 'user_token_expire' => $u_token_expire, 'device_type' => $u_device_type, 'created_at' =>time(), 'is_bound' => 1,'avator'=>$u_avator]);
                     $u_nickname="用户".$user_id;
                 }
-                $code = array('data' => array('u_id' => $user_id, 'u_token' => $u_token,'u_token_expire'=>$u_token_expire, 'u_nickname' => $u_nickname, 'u_head' => $u_avator, 'u_phone' => $u_phone), 'dec' => $this->success);
+                $code = array('data' => array('u_id' => $user_id, 'u_token' => $u_token,'u_token_expire'=>$u_token_expire, 'u_nickname' => $u_nickname, 'u_avator' => $u_avator, 'u_phone' => $u_phone), 'dec' => $this->success);
                 return response()->json($code);
             } else {
                 return response()->json(['dec' => $this->client_err]);

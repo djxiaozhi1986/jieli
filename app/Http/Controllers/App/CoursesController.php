@@ -237,7 +237,7 @@ class CoursesController extends Controller{
     public function add_comment_praise(Request $request){
         if($request->input('comment_id') && $request->input('login_user')){
             //判断是否重复点赞
-            $exist = Praises::where('comment_id',$request->input('course_id'))->where('from_user',$request->input('login_user'))->exists();
+            $exist = Praises::where('comment_id',$request->input('comment_id'))->where('from_user',$request->input('login_user'))->exists();
             if($exist){
                 $code = array('dec'=>$this->praise_err);
             }else{
