@@ -78,6 +78,17 @@ $router->group(['namespace' => 'App'], function($router) {
 });
 $router->group(['namespace' => 'admin'], function($router) {
     //课程管理
+    $router->post('/admin/courses/save','CoursesController@save_course');
+    //课程列表 *************
+    $router->get('/admin/courses/list','CoursesController@get_courses_list');
+    //讲师列表 *************
+    $router->get('/admin/lecturer/list','CoursesController@get_lecturer_list');
+    //上传图片
+    $router->post('/admin/upload','CoursesController@Upload');
+    //删除图片
+    $router->delete('/admin/removefile','CoursesController@RemoveFile');
+    //修改课程状态
+    $router->post('/admin/courses/editstatus','CoursesController@edit_course_status');
     //课程点赞记录
     //课程收藏记录
     //课程评论

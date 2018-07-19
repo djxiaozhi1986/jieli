@@ -15,6 +15,10 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller{
 
+    /**
+     * 生成订单号
+     * @return string 订单号
+     */
     private function generate_order_no(){
         //订单号码主体（YYYYMMDDHHIISSNNNNNNNN）
         $order_no_main = date('YmdHis') . rand(10000000,99999999);

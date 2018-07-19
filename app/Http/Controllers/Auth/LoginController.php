@@ -132,7 +132,7 @@ class LoginController extends Controller{
             $smsOperator = new \SmsOperator();
             $data['mobile'] = $u_phone;
             $random = rand(1000, 9999);
-            $data['text'] = '【海尔fabo】您的验证码是' . $random;
+            $data['text'] = '【天鹅阅读】您的验证码是' . $random;
             $result = $smsOperator->single_send($data);
             //缓存验证码
             $minutes = 2;
@@ -181,8 +181,8 @@ class LoginController extends Controller{
             //验证验证码
             if ($u_random == $random || $u_random == 1234) {
                 Cache::pull($u_phone);
-                $u_info = Users::select('user_id', 'user_token', 'user_token_expire', 'user_first_nickname', 'user_first_head', 'user_phone')
-                    ->where('user_phone', $u_phone)
+                $u_info = Users::select('user_id', 'user_token', 'user_token_expire', 'nickname', 'avator', 'phone')
+                    ->where('phone', $u_phone)
                     ->first();
                 if (!empty($u_info)) {
                     $user_id = $u_info->user_id;

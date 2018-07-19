@@ -27,8 +27,7 @@ class CorsMiddleware
         ];
 
         $this->allow_origin = [
-            // 'http://demo.lumen.cn',
-            '*'
+            'http://localhost:8080',
         ];
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 //        var_dump($origin);die;
