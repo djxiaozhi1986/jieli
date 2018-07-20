@@ -81,14 +81,21 @@ $router->group(['namespace' => 'admin'], function($router) {
     $router->post('/admin/courses/save','CoursesController@save_course');
     //课程列表 *************
     $router->get('/admin/courses/list','CoursesController@get_courses_list');
+    //课程明细
+    $router->get('/admin/courses/detail','CoursesController@get_course_detail');
+    $router->delete('/admin/courses/del','CoursesController@del_course');
     //讲师列表 *************
     $router->get('/admin/lecturer/list','CoursesController@get_lecturer_list');
-    //上传图片
+    //上传文件
     $router->post('/admin/upload','CoursesController@Upload');
     //删除图片
     $router->delete('/admin/removefile','CoursesController@RemoveFile');
     //修改课程状态
     $router->post('/admin/courses/editstatus','CoursesController@edit_course_status');
+    //修改课程音频文件，停止直播
+    $router->post('/admin/courses/editaudio','CoursesController@edit_course_audio');
+    $router->post('/admin/lecturer/save','CoursesController@save_lecturer');
+    $router->delete('/admin/lecturer/del','CoursesController@del_lecturer');
     //课程点赞记录
     //课程收藏记录
     //课程评论

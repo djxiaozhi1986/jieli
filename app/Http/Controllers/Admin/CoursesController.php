@@ -110,48 +110,25 @@ class CoursesController extends Controller{
     public function get_course_detail(Request $request){
         if($request->input('course_id')){
             $course = Courses::where('course_id',$request->input('course_id'))->first();
-            if($course){
-                if($course->status==0){
-                    $code = array('dec'=>$this->course_disable_err);
-                }elseif ($course->status==2){
-                    $code = array('dec'=>$this->course_close_err);
-                }else{
-                    $result['course_id']=$course->course_id;
-                    $result['title']=$course->title;
-                    $result['description']=$course->description;
-                    $result['lecturer_id']=$course->lecturer_id;
-                    $result['lecturer_name']=$course->lecturer_name;
-                    $result['cover']=$course->cover;
-                    $result['old_price']=$course->old_price;
-                    $result['now_price']=$course->now_price;
-                    $result['audio_url']=$course->audio_url;
-                    $result['is_home']=$course->is_home;
-                    $result['opened_at']=$course->opened_at;
-                    $result['closed_at']=$course->closed_at;
-                    //课程讲师信息
-                    if($course->lecturer_id){
-                        $lecturer = Lecturers::where('lecturer_id',$course->lecturer_id)->select('description')->first();
-                        if($lecturer){
-                            $result['lecturer_desc']=$lecturer->description??'没有简介';
-                        }else{
-                            $result['lecturer_desc']='没有简介';
-                        }
-                    }
-                    //此微课的点赞数量
-                    $result['praise_num'] = Praises::where('course_id',$course->course_id)->count();
-                    //当前登录用户是否已经点过赞
-                    if($request->input('login_user')){
-                        $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$course->course_id)->exists();
-                        if($exits){
-                            $result['is_praise'] = 1;//已经点赞
-                        }else{
-                            $result['is_praise'] = 0;//未点赞
-                        }
-                    }
-                    $code = array('dec'=>$this->success,'data'=>$result);
-                }
-            }else{
-                $code = array('dec'=>$this->course_nothing_err);
+            if($course) {
+                $result['course_id'] = $course->course_id;
+                $result['title'] = $course->title;
+                $result['description'] = $course->description;
+                $result['lecturer_id'] = $course->lecturer_id;
+                $result['lecturer_name'] = $course->lecturer_name;
+                $result['cover'] = $course->cover;
+                $result['old_price'] = $course->old_price;
+                $result['now_price'] = $course->now_price;
+                $result['audio_url'] = $course->audio_url;
+                $result['is_home'] = $course->is_home;
+                $result['is_good'] = $course->is_good;
+                $result['opened_at'] = $course->opened_at;
+                $result['opened_at_date'] = $course->opened_at;
+                $result['opened_at_time'] = $course->opened_at;
+                $result['closed_at'] = $course->closed_at;
+                $result['closed_at_date'] = $course->closed_at;
+                $result['closed_at_time'] = $course->closed_at;
+                $code = array('dec'=>$this->success,'data'=>$result);
             }
         }
         else{
@@ -332,12 +309,16 @@ class CoursesController extends Controller{
                 //检查mime
                 $fi = new \finfo(FILEINFO_MIME_TYPE);
                 if (!$this->_isImg($fi->file($file->getPathname()))) return response()->json(['dec' => $this->http_mime_err]);
-                $path = config('C.IMG_URL');
+
                 // if(!$request->input('file_type')){
                 //     $path = $path . $request->input('file_type').'/';
                 // }else{
                 //     $path = $path;
                 // }
+                $path = config('C.IMG_URL');
+                if($request->input('type') && $request->input('type')=="1"){
+                    $path = config('C.FILE_URL');
+                }
                 $file_prefix = date("YmdHis").rand(100, 200);
                 $extension = $file->getClientOriginalExtension();
                 $filename = $file_prefix . '.' . $extension;
@@ -382,13 +363,13 @@ class CoursesController extends Controller{
      * @return [type]           [description]
      */
     public function save_course(Request $request){
-        if($request->input("title") && $request->input("description") && $request->input("lecturer_id") && $request->input("lecturer_name") && $request->input("cover") && $request->input("audio_url") && $request->input('opened_at') && $request->input('closed_at')){
+        if($request->input("title") && $request->input("description") && $request->input("lecturer_id") && $request->input("lecturer_name") && $request->input("cover")  && $request->input('opened_at') && $request->input('closed_at')){
             $save_data['title']         = $request->input('title');
             $save_data['description']   = $request->input('description');
             $save_data['lecturer_id']   = $request->input('lecturer_id');
             $save_data['lecturer_name'] = $request->input('lecturer_name');
             $save_data['cover']         = $request->input('cover');
-            $save_data['audio_url']     = $request->input('audio_url');
+//            $save_data['audio_url']     = $request->input('audio_url');
             $save_data['opened_at']     = $request->input('opened_at');
             $save_data['closed_at']     = $request->input('closed_at');
             if($request->input('old_price')){
@@ -434,8 +415,8 @@ class CoursesController extends Controller{
     public function edit_course_audio(Request $request)
     {
         if($request->input("course_id") && $request->input("audio_url")){
-            $save_data['is_live'] = 0;
-            $save_data['audio_url'] = $request->input("audio_url");
+            $save_data['is_live'] = 0;//停止直播
+            $save_data['audio_url'] = $request->input("audio_url");//线下组合音频文件
             $res = Courses::where('course_id',$request->input("course_id"))->update($save_data);
             if($res){
                 $code = array('dec' => $this->success);
@@ -470,6 +451,83 @@ class CoursesController extends Controller{
             $code = array('dec'=>$this->client_err);
         }
 
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
+    /**
+     * 删除微课
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function del_course(Request $request){
+        if($request->input("course_id")){
+            $res = Courses::where('course_id',$request->input("course_id"))->delete();
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec'=>$this->error);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
+    /**
+     * 保存讲师信息
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function save_lecturer(Request $request){
+        if($request->input("lecturer_title") && $request->input("description")
+            && $request->input("lecturer_name") && $request->input("lecturer_avator")){
+            $save_data['lecturer_title']  = $request->input('lecturer_title');
+            $save_data['description']     = $request->input('description');
+            $save_data['lecturer_name']   = $request->input('lecturer_name');
+            $save_data['lecturer_avator']  = $request->input('lecturer_avator');
+            $res = false;
+            if($request->input('lecturer_id')){
+                //修改
+                $res = Lecturers::where('lecturer_id',$request->input("lecturer_id"))->update($save_data);
+            }else{
+                //添加
+                $save_data['created_at'] = $save_data['updated_at'] = time();
+                $res = Lecturers::create($save_data);
+            }
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec'=>$this->error);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
+
+    /**
+     * 删除微课
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function del_lecturer(Request $request){
+        if($request->input("lecturer")){
+            $res = Lecturers::where('lecturer',$request->input("lecturer"))->delete();
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec'=>$this->error);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
