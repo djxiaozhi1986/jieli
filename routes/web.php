@@ -14,6 +14,8 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->post('/upload_pic','ExampleController@editor_upload_pic');
 $router->group(['namespace' => 'App'], function($router) {
     //推荐课程列表 *************
     $router->get('/courses/recomlist','CoursesController@get_home_courses_list');
