@@ -15,6 +15,7 @@ use App\Modules\Favorites;
 use App\Modules\Foots;
 use App\Modules\Lecturers;
 use App\Modules\Praises;
+use App\Modules\Sections;
 use App\Modules\Users_courses_relation;
 use Illuminate\Http\Request;
 
@@ -121,20 +122,19 @@ class CoursesController extends Controller{
                     $result['lecturer_id']=$course->lecturer_id;
                     $result['lecturer_name']=$course->lecturer_name;
                     $result['cover']=$course->cover;
-                    $result['old_price']=$course->old_price;
-                    $result['now_price']=$course->now_price;
-                    $result['audio_url']=$course->audio_url;
                     $result['is_home']=$course->is_home;
                     $result['is_live']=$course->is_live;
                     $result['opened_at']=$course->opened_at;
                     $result['closed_at']=$course->closed_at;
                     //课程讲师信息
                     if($course->lecturer_id){
-                        $lecturer = Lecturers::where('lecturer_id',$course->lecturer_id)->select('description')->first();
+                        $lecturer = Lecturers::where('lecturer_id',$course->lecturer_id)->select('description','lecturer_avator')->first();
                         if($lecturer){
                             $result['lecturer_desc']=$lecturer->description??'没有简介';
+                            $result['lecturer_avator'] = $lecturer->lecturer_avator??'';
                         }else{
                             $result['lecturer_desc']='没有简介';
+                            $result['lecturer_avator'] = '';
                         }
                     }
                     //此微课的点赞数量
@@ -155,6 +155,38 @@ class CoursesController extends Controller{
             }
         }
         else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
+    /**
+     * 课程章节列表
+     * @param Request $request page_index 可选，不传获取所有，pagesize=10
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_course_sections(Request $request){
+        $course_id = $request->input('course_id');
+        if($course_id){
+            $sql = Sections::where('course_id',$course_id);
+            $total = $sql->count();
+            $sort = 'asc';
+            if(isset($request['sort'])){
+                if($request['sort']!=0){//正序
+                    $sort = 'desc';
+                }
+            }
+            $sql = $sql->orderBy('order',$sort);
+            if(isset($request['page_index'])){
+                $page_index = $request['page_index'];
+                $page_number = 10;
+                $sql = $sql->skip(($page_index - 1) * $page_number)->take($page_number);
+            }
+            $result = $sql->get()->toArray();
+            $code = array('dec'=>$this->success,'data'=>$result,'total'=>$total);
+        }else{
             $code = array('dec'=>$this->client_err);
         }
         $json_str = json_encode($code);

@@ -8,6 +8,7 @@
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\libraries\HttpClient;
 use App\Modules\Users;
 use Illuminate\Http\Request;
 
@@ -256,5 +257,170 @@ class UserController extends Controller{
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
+    }
+    public function api_reset_phone(Request $request){
+        $user_id = $request->input('login_user');
+        $u_phone = $request->input('new_phone');
+        if($user_id && $u_phone){
+            $request_path = '/user/resetMobile';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id,'u_phone'=>$u_phone];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function api_classify_all(Request $request){
+        $request_path = '/classify/allList';
+        $request_url = config('C.API_URL').$request_path;
+        $response = HttpClient::api_request($request_url,[],'POST',true);
+        $code = json_decode($response);
+        return response()->json($code);
+    }
+    public function api_classify_user(Request $request){
+        $user_id = $request->input('login_user');
+        if($user_id) {
+            $request_path = '/classify/userList';
+            $request_url = config('C.API_URL') . $request_path;
+            $response = HttpClient::api_request($request_url, ['user_id'=>$user_id], 'POST', true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function api_classify_edit(Request $request){
+        $user_id = $request->input('login_user');
+        $follow_id = $request->input('follow_id');
+        if($user_id && $follow_id){
+            $request_path = '/classify/update';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id,'follow_id'=>$follow_id];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function api_reset_pwd(Request $request){
+        $user_id = $request->input('login_user');
+        $follow_id = $request->input('follow_id');
+        if($user_id && $follow_id){
+            $request_path = '/classify/update';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id,'follow_id'=>$follow_id];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function api_expert_class(Request $request){
+        $user_id = $request->input('login_user');
+        if($user_id){
+            $request_path = '/expert/expertClass';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function api_expert_list(Request $request){
+        $user_id = $request->input('login_user');
+        $page_index = $request->input('page_index');
+        $forum_id = $request->input('forum_id');
+        if($user_id && $page_index && $forum_id){
+            $request_path = '/expert/list';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id,'page_index'=>$page_index];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function api_expert_invite(Request $request){
+        $user_id = $request->input('login_user');
+        $exper_ids = $request->input('exper_ids');
+        $qa_id = $request->input('qa_id');
+        if($user_id && $exper_ids && $qa_id){
+            $request_path = '/expert/invite';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id,'exper_ids'=>$exper_ids,'qa_id'=>$qa_id];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function api_get_userinfo(Request $request){
+        $user_id = $request->input('login_user');
+        if($user_id){
+            $user = $this->api_get_user_fun($user_id);
+            if($user!=null){
+                $user = json_decode(json_encode($user->detail),TRUE);
+                $code = array('dec'=>$this->success,'data'=>$user);
+            }else{
+                //无此用户
+                $code = array('dec'=>$this->login_uname_err);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function api_get_user_fun($user_id){
+        $request_path = '/user/getUser';
+        $request_url = config('C.API_URL').$request_path;
+        $params = ['user_id'=>$user_id];
+        $response = HttpClient::api_request($request_url,$params,'POST',true);
+        $res = json_decode($response);
+        $user = null;
+        if($res->dec->code=='000000'){
+            $user = $res->data;
+        }
+        return $user;
+    }
+    public function api_set_info(Request $request){
+//        user_id 用户ID
+//        email 邮箱（非必填）
+//        nick_name 昵称（非必填）
+//        real_name 真名（非必填）
+//        birthday yyyy-MM-dd（非必填）
+//        sex 性别（非必填）
+        $user_id = $request->input('login_user');
+        if($user_id){
+            if($request->input('email')){
+                $params['email'] = $request->input('email');
+            }
+            if($request->input('nick_name')){
+                $params['nick_name'] = $request->input('nick_name');
+            }
+            if($request->input('real_name')){
+                $params['real_name'] = $request->input('real_name');
+            }
+            if($request->input('birthday')){
+                $params['birthday'] = $request->input('birthday');
+            }
+            if(isset($request['sex'])){
+                $params['sex'] = $request->input('sex');
+            }
+            $request_path = '/user/setinfo';
+            $request_url = config('C.API_URL').$request_path;
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
     }
 }

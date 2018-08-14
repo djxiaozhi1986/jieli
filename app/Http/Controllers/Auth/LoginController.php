@@ -7,7 +7,9 @@
  */
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\App\UserController;
 use App\Http\Controllers\Controller;
+use App\libraries\HttpClient;
 use App\Modules\Users;
 use Illuminate\Http\Request;
 use Cache;
@@ -29,29 +31,17 @@ class LoginController extends Controller{
         $u_phone =$request->input('u_phone');
         $u_pwd = $request->input('u_pwd');
         $u_random = $request->input('u_random');
+        $device_type = $request->input('device_type');
+        $device_id = $request->input('device_id');
         if (preg_match("/^1[34578][0-9]{9}$/", $u_phone) && !empty($u_random)) {
             $random = Cache::get($u_phone);
             //验证验证码
             if ($u_random == $random || $u_random == 1234) {
-                $user = Users::where('phone', $u_phone)->first();
-                if (!empty($user)) {
-                    $code = array('dec' => $this->user_exist_err);
-                } else {
-                    //创建用户
-                    $savedata['phone'] = $savedata['username'] = $u_phone;
-                    $savedata['password'] = md5(md5($u_pwd));
-                    $savedata['avator'] = config('C.DEFAULT_AVATOR');//默认头像
-                    $savedata['user_token'] = $this->create_token();
-                    $savedata['user_token_expire'] = time() + (7 * 24 * 3600);
-                    $savedata['created_at'] = time();
-                    $savedata['updated_at'] = time();
-                    $user_id = Users::insertGetId($savedata);
-                    if($user_id){
-                        $code = array('dec' => $this->success);
-                    }else{
-                        $code = array('dec' => $this->error);
-                    }
-                }
+                $request_path = '/user/appregister';
+                $request_url = config('C.API_URL').$request_path;
+                $params = ['u_phone'=>$u_phone,'u_pwd'=>$u_pwd,'device_type'=>$device_type,'device_id'=>$device_id];
+                $response = HttpClient::api_request($request_url,$params,'POST',true);
+                $code = json_decode($response);
             } else {
                 $code = array('dec' => $this->val_err);
             }
@@ -272,4 +262,30 @@ class LoginController extends Controller{
             return response()->json(['dec' => $this->client_err]);
         }
     }
+
+    /**
+     * 接口调用登录
+     * @author:zq
+     * @param     array               $request 所有请求参数
+     * @param     int                 $u_phone 用户手机号
+     * @param     int                 $u_pwd 用户密码
+     * @return    string              json字符串
+     */
+    public function api_phone_login(Request $request){
+        $u_phone = $request['u_phone'];
+        $u_pwd = $request['u_pwd'];
+        if($u_phone && $u_pwd){
+            $request_path = '/user/phoneLogin';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['u_phone'=>$u_phone,'u_pwd'=>$u_pwd];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+
+
+
 }

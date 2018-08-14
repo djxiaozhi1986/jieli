@@ -23,6 +23,8 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/courses/list','CoursesController@get_courses_list');
     //课程信息 *************
     $router->get('/courses/detail','CoursesController@get_course_detail');
+    //课程章节列表**********
+    $router->get('/courses/sections','CoursesController@get_course_sections');
     //课程评论列表 *************
     $router->get('/courses/comments','CoursesController@get_course_comments');
     //发表评论 *************
@@ -45,12 +47,16 @@ $router->group(['namespace' => 'App'], function($router) {
 
     //用户中心-修改密码 *************
     $router->post('/user/resetpwd','UserController@reset_pwd');
+    $router->post('/user/resetpwd','UserController@api_reset_pwd');
+
     //用户中心-修改个人资料 *************
-    $router->post('/user/editprofile','UserController@edit_profile');
+//    $router->post('/user/editprofile','UserController@edit_profile');
+    $router->post('/user/editprofile','UserController@api_set_info');
     //用户中心-修改个人头像 *************
     $router->post('/user/avator','UserController@edit_avator');
     //用户中心-修改手机号码 *************
-    $router->post('/user/editphone','UserController@edit_phone');
+//    $router->post('/user/editphone','UserController@edit_phone');
+    $router->post('/user/editphone','UserController@api_reset_phone');
     //用户中心-积分变更 *************
     $router->post('/user/changescore','UserController@change_score');
     //用户中心-天鹅币变更 *************
@@ -65,6 +71,16 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/user/mygoodcourses','CoursesController@my_good_courses');
     //用户中心-我的足迹 *************
     $router->get('/user/myfoots','CoursesController@my_foots');
+    //分类相关接口
+    $router->get('/classify/update','UserController@api_classify_edit');
+    $router->get('/classify/all','UserController@api_classify_all');
+    $router->get('/classify/user','UserController@api_classify_user');
+
+    $router->get('/expert/class','UserController@api_expert_class');
+    $router->get('/expert/list','UserController@api_expert_list');
+    $router->get('/expert/invite','UserController@api_expert_invite');
+
+    $router->get('/user/info','UserController@api_get_userinfo');
 
 
     //购物车查询
@@ -77,6 +93,22 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->post('/order/create','OrderController@create');
     //天鹅币支付
     $router->get('/order/coin_pay','OrderController@coin_pay');
+
+    //问答
+    $router->get('/answer/list','AnswerController@api_answer_list');
+    $router->get('/answer/detail','AnswerController@api_answer_detail');
+    $router->post('/answer/add','AnswerController@api_answer_add');
+    $router->post('/answer/unfavorite','AnswerController@api_answer_unfavorite');
+    $router->post('/answer/favorite','AnswerController@api_answer_favorite');
+    $router->get('/answer/replay','AnswerController@api_answer_reply');
+    $router->post('/answer/adopt','AnswerController@api_answer_adopt');
+    $router->post('/answer/zan','AnswerController@api_answer_zan');
+    $router->get('/answer/reply/list','AnswerController@api_answer_reply_list');//replyAnswerList
+    $router->post('/answer/reply/comment','AnswerController@api_answer_reply_comment');//replyAnswerList
+    $router->get('/answer/comment/list','AnswerController@api_answer_comment_list');
+    $router->get('/answer/reply/detail','AnswerController@api_answer_reply_detail');
+    $router->post('/answer/report','AnswerController@api_answer_report');
+
 });
 $router->group(['namespace' => 'admin'], function($router) {
     //课程管理

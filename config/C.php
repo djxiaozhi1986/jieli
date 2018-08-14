@@ -8,4 +8,5 @@ return array(
     'FILE_URL'              =>      'uploads/files/',
     'UPLOAD_TMP'            =>      'uploads/tmp/',
     'DEFAULT_AVATOR'        =>      'default_avator.png',
+    'API_URL'               =>      'http://47.98.110.247:9532/api/v1',
 );

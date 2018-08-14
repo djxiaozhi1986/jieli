@@ -8,6 +8,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\libraries\HttpClient;
 use App\Modules\Carts;
 use App\Modules\Comments;
 use App\Modules\Courses;
@@ -274,28 +275,51 @@ class CoursesController extends Controller{
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
      */
+//    public function get_lecturer_list(Request $request){
+//        $page_index = $request->input('page_index')??1;//页码
+//        $page_number = $request->input('page_number')??10;//每页显示
+//        //初始化sql
+//        $sql = Lecturers::where('status',1)->orderBy('created_at','desc');
+//        //附加条件,模糊查询 课程标题、讲师姓名或昵称
+//        if($request->input('keyword')){
+//            $key = $request->input('keyword');
+//            $sql = $sql->where(function ($query) use($key){
+//                $query->where('lecturer_name','like','%'.$key.'%')
+//                    ->orWhere('lecturer_title','like','%'.$key.'%')
+//                    ->orWhere('description','like','%'.$key.'%');
+//            });
+//        }
+//        $total = $sql->count();
+//        $list = $sql->select('lecturer_id','lecturer_name','description','lecturer_title','created_at','status')
+//            ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+//        $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
+//        $json_str = json_encode($code);
+//        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+//        return response()->json($res_json);
+//    }
     public function get_lecturer_list(Request $request){
-        $page_index = $request->input('page_index')??1;//页码
-        $page_number = $request->input('page_number')??10;//每页显示
-        //初始化sql
-        $sql = Lecturers::where('status',1)->orderBy('created_at','desc');
-        //附加条件,模糊查询 课程标题、讲师姓名或昵称
-        if($request->input('keyword')){
-            $key = $request->input('keyword');
-            $sql = $sql->where(function ($query) use($key){
-                $query->where('lecturer_name','like','%'.$key.'%')
-                    ->orWhere('lecturer_title','like','%'.$key.'%')
-                    ->orWhere('description','like','%'.$key.'%');
-            });
+        $user_id = $request->input('login_user');
+        $page_index = $request->input('page_index');
+        $forum_id = $request->input('forum_id');
+        if($page_index){
+            $request_path = '/expert/list';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['page_index'=>$page_index];
+            if($user_id){
+                $params['user_id'] = $user_id;
+            }
+            if($forum_id){
+                $params['forum_id'] = $forum_id;
+            }
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
         }
-        $total = $sql->count();
-        $list = $sql->select('lecturer_id','lecturer_name','description','lecturer_title','created_at','status')
-            ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
-        $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
-        $json_str = json_encode($code);
-        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
-        return response()->json($res_json);
+        return response()->json($code);
     }
+
+
     /**
      * 上传文件（课程封皮，讲师头像）
      * @param Request $request [description]
