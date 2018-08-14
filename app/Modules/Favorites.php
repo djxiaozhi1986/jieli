@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Favorites extends Model
 {
-    public $table = 'favorites';//数据库表名
+    public $table = 'courses_favorites';//数据库表名
     //数据库字段，白名单，只能查询此队列中的字段
     protected $fillable = ['favorite_id', 'user_id', 'course_id', 'created_at'];
     public $primaryKey = "favorite_id";//主键

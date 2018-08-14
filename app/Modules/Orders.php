@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Orders extends Model
 {
-    public $table = 'orders';//数据库表名
+    public $table = 'courses_orders';//数据库表名
     //数据库字段，白名单，只能查询此队列中的字段
     protected $fillable = ['order_id','order_title', 'order_no', 'order_amount','order_plat','transaction_no',
                             'created_at','completed_at','order_status','course_id','user_id','remarks'];

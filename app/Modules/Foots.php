@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Foots extends Model
 {
-    public $table = 'foots';//数据库表名
+    public $table = 'courses_foots';//数据库表名
     //数据库字段，白名单，只能查询此队列中的字段
     protected $fillable = ['foot_id', 'course_id', 'in_time', 'out_time'];
     public $primaryKey = "foot_id";//主键

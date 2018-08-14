@@ -233,7 +233,7 @@ class UserController extends Controller{
                     if($u_new_random == $c_new_random || $u_new_random=='1234'){
                         $up['username'] = $u_new_phone;
                         $up['phone'] = $u_new_phone;
-                        $res = Users::where('user_id',$user_id)->update($up);
+                        $res = $this->api_reset_phone($user_id,$u_new_phone);
                         if($res){
                             $code = array('dec'=>$this->success);
                         }else{
@@ -258,19 +258,21 @@ class UserController extends Controller{
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
     }
-    public function api_reset_phone(Request $request){
-        $user_id = $request->input('login_user');
-        $u_phone = $request->input('new_phone');
+    public function api_reset_phone($user_id,$u_phone){
         if($user_id && $u_phone){
             $request_path = '/user/resetMobile';
             $request_url = config('C.API_URL').$request_path;
             $params = ['user_id'=>$user_id,'u_phone'=>$u_phone];
             $response = HttpClient::api_request($request_url,$params,'POST',true);
-            $code = json_decode($response);
+            $res = json_decode($response);
+            if($res->dec->code=='000000'){
+                return true;
+            }else{
+                return false;
+            }
         }else{
-            $code = array('dec'=>$this->client_err);
+            return false;
         }
-        return response()->json($code);
     }
     public function api_classify_all(Request $request){
         $request_path = '/classify/allList';

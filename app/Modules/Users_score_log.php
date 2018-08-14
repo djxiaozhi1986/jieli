@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Users_score_log extends Model
 {
-    public $table = 'users_score_log';//数据库表名
+    public $table = 'courses_users_score_log';//数据库表名
     //数据库字段，白名单，只能查询此队列中的字段
     protected $fillable = ['log_id', 'user_id', 'score', 'log_at','log_desc'];
     public $primaryKey = "log_id";//主键

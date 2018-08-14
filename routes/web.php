@@ -17,6 +17,9 @@ $router->get('/', function () use ($router) {
 
 $router->post('/upload_pic','ExampleController@editor_upload_pic');
 $router->group(['namespace' => 'App'], function($router) {
+    //公共类
+    //发送短信
+    $router->post('/common/msg/send','CommonController@send_message');
     //推荐课程列表 *************
     $router->get('/courses/recomlist','CoursesController@get_home_courses_list');
     //课程列表 *************
@@ -47,7 +50,7 @@ $router->group(['namespace' => 'App'], function($router) {
 
     //用户中心-修改密码 *************
     $router->post('/user/resetpwd','UserController@reset_pwd');
-    $router->post('/user/resetpwd','UserController@api_reset_pwd');
+//    $router->post('/user/resetpwd','UserController@api_reset_pwd');
 
     //用户中心-修改个人资料 *************
 //    $router->post('/user/editprofile','UserController@edit_profile');
@@ -55,8 +58,8 @@ $router->group(['namespace' => 'App'], function($router) {
     //用户中心-修改个人头像 *************
     $router->post('/user/avator','UserController@edit_avator');
     //用户中心-修改手机号码 *************
-//    $router->post('/user/editphone','UserController@edit_phone');
-    $router->post('/user/editphone','UserController@api_reset_phone');
+    $router->post('/user/editphone','UserController@edit_phone');
+//    $router->post('/user/editphone','UserController@api_reset_phone');
     //用户中心-积分变更 *************
     $router->post('/user/changescore','UserController@change_score');
     //用户中心-天鹅币变更 *************
@@ -95,18 +98,31 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/order/coin_pay','OrderController@coin_pay');
 
     //问答
+    //列表
     $router->get('/answer/list','AnswerController@api_answer_list');
+    //详情
     $router->get('/answer/detail','AnswerController@api_answer_detail');
+    //回答
     $router->post('/answer/add','AnswerController@api_answer_add');
+    //取消收藏
     $router->post('/answer/unfavorite','AnswerController@api_answer_unfavorite');
+    //收藏
     $router->post('/answer/favorite','AnswerController@api_answer_favorite');
-    $router->get('/answer/replay','AnswerController@api_answer_reply');
+    //回复回答
+    $router->post('/answer/replay','AnswerController@api_answer_reply');
+    //采纳回答
     $router->post('/answer/adopt','AnswerController@api_answer_adopt');
+    //点赞回答
     $router->post('/answer/zan','AnswerController@api_answer_zan');
-    $router->get('/answer/reply/list','AnswerController@api_answer_reply_list');//replyAnswerList
-    $router->post('/answer/reply/comment','AnswerController@api_answer_reply_comment');//replyAnswerList
+    //回复列表
+    $router->get('/answer/reply/list','AnswerController@api_answer_reply_list');
+    //回复评论
+    $router->post('/answer/reply/comment','AnswerController@api_answer_reply_comment');
+    //回复评论列表
     $router->get('/answer/comment/list','AnswerController@api_answer_comment_list');
+    //回复详情
     $router->get('/answer/reply/detail','AnswerController@api_answer_reply_detail');
+    //
     $router->post('/answer/report','AnswerController@api_answer_report');
 
 });

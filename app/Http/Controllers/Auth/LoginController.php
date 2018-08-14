@@ -161,10 +161,10 @@ class LoginController extends Controller{
     public function verify_login(Request $request)
     {
         //获取参数
-        $u_phone = $request['u_phone'];
-        $u_random = $request['u_random'];
-        $u_device_type = $request['device_type'];
-        $u_device_id = $request['device_id'];
+        $u_phone = $request->input('u_phone');
+        $u_random = $request->input('u_random');
+        $u_device_type = $request->input('device_type');
+        $u_device_id = $request->input('device_id');
         //手机登录
         if (preg_match("/^1[34578][0-9]{9}$/", $u_phone) && !empty($u_random)) {
             $random = Cache::get($u_phone);

@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Praises extends Model
 {
-    public $table = 'praises';//数据库表名
+    public $table = 'courses_praises';//数据库表名
     //数据库字段，白名单，只能查询此队列中的字段
     protected $fillable = ['praise_id', 'course_id', 'comment_id', 'from_user','created_at'];
     public $primaryKey = "praise_id";//主键

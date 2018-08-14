@@ -9,4 +9,5 @@ return array(
     'UPLOAD_TMP'            =>      'uploads/tmp/',
     'DEFAULT_AVATOR'        =>      'default_avator.png',
     'API_URL'               =>      'http://47.98.110.247:9532/api/v1',
+    'MASSAGE_URL'           =>      'http://106.ihuyi.cn/webservice/sms.php?method=Submit',
 );

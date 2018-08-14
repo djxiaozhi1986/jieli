@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sections extends Model
 {
-    public $table = 'sections';//数据库表名
+    public $table = 'courses_sections';//数据库表名
     //数据库字段，白名单，只能查询此队列中的字段
     protected $fillable = ['section_id', 'course_id', 'title', 'audio_url','is_free','price','status','order_index'];
     public $primaryKey = "section_id";//主键

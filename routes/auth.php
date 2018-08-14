@@ -20,13 +20,13 @@ $router->group(['namespace' => 'Auth'], function($router) {
     $router->get('/oauth/wechat/oauth_callback', 'WechatController@oauth_callback');
 
     //发送验证码
-    $router->post('/sendcode','LoginController@verif');
+//    $router->post('/sendcode','LoginController@verif');
     //注册
     $router->post('/oauth/register','LoginController@register');
     //登录
-//    $router->post('/oauth/pwd','LoginController@pwd_login');
+    $router->post('/oauth/pwd','LoginController@pwd_login');
     $router->post('/oauth/verify','LoginController@verify_login');
-    $router->post('/oauth/wechat',['middleware' => 'wechat.oauth','uses'=>'WechatController@wechat_login']);
+//    $router->post('/oauth/wechat',['middleware' => 'wechat.oauth','uses'=>'WechatController@wechat_login']);
 //    $router->post('/oauth/weibo','LoginController@weibo_login');
 //    $router->post('/oauth/qq','LoginController@qq_login');
 //    $router->post('/oauth/github','LoginController@github_login');
