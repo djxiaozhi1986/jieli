@@ -28,7 +28,7 @@ CREATE TABLE `jl_courses` (
   `lecturer_id` int(11) DEFAULT NULL COMMENT '讲师id',
   `lecturer_name` varchar(50) DEFAULT NULL COMMENT '讲师姓名或昵称',
   `cover` varchar(300) DEFAULT NULL COMMENT '封皮地址',
-  `old_price` decimal(10,2) DEFAULT NULL COMMENT '原价',
+  `coin_price` decimal(10,2) DEFAULT NULL COMMENT '原价',
   `now_price` decimal(10,2) DEFAULT NULL COMMENT '现价',
   `is_live` tinyint(1) DEFAULT NULL COMMENT '课程类别，0视频课程，1直播课程',
   `audio_url` varchar(500) DEFAULT NULL COMMENT '课程视频地址',

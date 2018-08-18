@@ -16,6 +16,8 @@ use App\Modules\Favorites;
 use App\Modules\Foots;
 use App\Modules\Lecturers;
 use App\Modules\Praises;
+use App\Modules\Sections;
+use App\Modules\Users;
 use App\Modules\Users_courses_relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -41,7 +43,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name','cover','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
 
 //        array_walk_recursive($list, $this->convertNull());
@@ -82,7 +84,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','old_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name','cover','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
         foreach ($list as $key=>$value){
             //此微课的点赞数量
@@ -118,7 +120,7 @@ class CoursesController extends Controller{
                 $result['lecturer_id'] = $course->lecturer_id;
                 $result['lecturer_name'] = $course->lecturer_name;
                 $result['cover'] = $course->cover;
-                $result['old_price'] = $course->old_price;
+                $result['coin_price'] = $course->coin_price;
                 $result['now_price'] = $course->now_price;
                 $result['audio_url'] = $course->audio_url;
                 $result['is_home'] = $course->is_home;
@@ -133,6 +135,36 @@ class CoursesController extends Controller{
             }
         }
         else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+    /**
+     * 课程章节列表
+     * @param Request $request page_index 可选，不传获取所有，pagesize=10
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_course_sections(Request $request){
+        $course_id = $request->input('course_id');
+        $page_index = $request->input('page_index')??1;//页码
+        $page_number = $request->input('page_number')??10;//每页显示
+        if($course_id){
+            $sql = Sections::where('course_id',$course_id);
+            $total = $sql->count();
+//            var_dump($request->input('course_id'));die;
+            $sort = 'asc';
+            if($request->input('sort')!=0){
+                $sort = 'desc';
+            }
+            $sql = $sql->orderBy('order_index',$sort);
+            $sql = $sql->skip(($page_index - 1) * $page_number)->take($page_number);
+
+            $result = $sql->get()->toArray();
+
+            $code = array('dec'=>$this->success,'data'=>$result,'total'=>$total);
+        }else{
             $code = array('dec'=>$this->client_err);
         }
         $json_str = json_encode($code);
@@ -297,28 +329,19 @@ class CoursesController extends Controller{
 //        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
 //        return response()->json($res_json);
 //    }
-    public function get_lecturer_list(Request $request){
-        $user_id = $request->input('login_user');
-        $page_index = $request->input('page_index');
-        $forum_id = $request->input('forum_id');
-        if($page_index){
-            $request_path = '/expert/list';
-            $request_url = config('C.API_URL').$request_path;
-            $params = ['page_index'=>$page_index];
-            if($user_id){
-                $params['user_id'] = $user_id;
-            }
-            if($forum_id){
-                $params['forum_id'] = $forum_id;
-            }
-            $response = HttpClient::api_request($request_url,$params,'POST',true);
-            $code = json_decode($response);
-        }else{
-            $code = array('dec'=>$this->client_err);
-        }
-        return response()->json($code);
-    }
 
+    /***
+     * 获取所有讲师
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_lecturer_list(Request $request){
+        $res = Users::where('user_type',2)->select('user_id','nick_name','user_title','real_name','user_level','user_face','phone','intro','award')->get()->toArray();
+        $code = array('dec' => $this->success, 'data' => $res);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
 
     /**
      * 上传文件（课程封皮，讲师头像）
@@ -396,8 +419,8 @@ class CoursesController extends Controller{
 //            $save_data['audio_url']     = $request->input('audio_url');
             $save_data['opened_at']     = $request->input('opened_at');
             $save_data['closed_at']     = $request->input('closed_at');
-            if($request->input('old_price')){
-                $save_data['old_price'] = $request->input('old_price');
+            if($request->input('coin_price')){
+                $save_data['coin_price'] = $request->input('coin_price');
             }
             if($request->input('now_price')){
                 $save_data['now_price'] = $request->input('now_price');
@@ -408,6 +431,9 @@ class CoursesController extends Controller{
             }
             if($request->input('is_home')){
                 $save_data['is_home'] = $request->input('is_home');
+            }
+            if($request->input('is_oa')){
+                $save_data['is_oa'] = $request->input('is_oa');
             }
             $res = false;
             if($request->input('course_id')){

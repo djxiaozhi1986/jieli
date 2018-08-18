@@ -26,7 +26,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/courses/list','CoursesController@get_courses_list');
     //课程信息 *************
     $router->get('/courses/detail','CoursesController@get_course_detail');
-    //课程章节列表**********
+    //课程章节列表********** new
     $router->get('/courses/sections','CoursesController@get_course_sections');
     //课程评论列表 *************
     $router->get('/courses/comments','CoursesController@get_course_comments');
@@ -46,6 +46,8 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->post('/courses/addfoot','CoursesController@add_foots');
     //足迹停留，离开微课详情页使用 *************
     $router->post('/courses/footstay','CoursesController@foot_stay');
+    //同类购买-new
+    $router->get('/courses/similar','CoursesController@similar_course_list');
 
 
     //用户中心-修改密码 *************
@@ -75,7 +77,7 @@ $router->group(['namespace' => 'App'], function($router) {
     //用户中心-我的足迹 *************
     $router->get('/user/myfoots','CoursesController@my_foots');
     //分类相关接口
-    $router->get('/classify/update','UserController@api_classify_edit');
+    $router->post('/classify/update','UserController@api_classify_edit');
     $router->get('/classify/all','UserController@api_classify_all');
     $router->get('/classify/user','UserController@api_classify_user');
 
@@ -129,6 +131,7 @@ $router->group(['namespace' => 'App'], function($router) {
 $router->group(['namespace' => 'admin'], function($router) {
     //课程管理
     $router->post('/admin/courses/save','CoursesController@save_course');
+    $router->get('/admin/courses/sections','CoursesController@get_course_sections');
     //课程列表 *************
     $router->get('/admin/courses/list','CoursesController@get_courses_list');
     //课程明细

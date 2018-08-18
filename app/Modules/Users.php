@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Users extends Model
 {
-    public $table = 'users';//数据库表名
+    public $table = 'user';//数据库表名
     //数据库字段，白名单，只能查询此队列中的字段
     protected $fillable = ['user_id', 'user_name', 'user_pass', 'real_name','nick_name','user_type','user_level','user_face','device_type','user_points',
         'email','phone','sex','birthday','jieli_coin','jieli_coin_frozen','new_msg','activity','questions','answers','best','join_activity',
