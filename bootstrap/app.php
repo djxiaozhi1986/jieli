@@ -65,12 +65,12 @@ $app->middleware([
 $app->routeMiddleware([
     'wechat.oauth'=>\App\Http\Middleware\WechatMiddleware::class,
 ]);
-// $app->middleware([
-//    app\Http\Middleware\ExampleMiddleware::class
+// $App->middleware([
+//    App\Http\Middleware\ExampleMiddleware::class
 // ]);
 
-// $app->routeMiddleware([
-//     'auth' => app\Http\Middleware\Authenticate::class,
+// $App->routeMiddleware([
+//     'auth' => App\Http\Middleware\Authenticate::class,
 // ]);
 
 /*
@@ -86,12 +86,12 @@ $app->routeMiddleware([
 $app->configure('C');
 $app->configure('database');
 //增加邮件发送
-//$app->configure('mail');
+//$App->configure('mail');
 $app->configure('wechat');
 $app->configure('session');
 $app->register(Illuminate\Session\SessionServiceProvider::class);
-// $app->register(Maatwebsite\Excel\ExcelServiceProvider::class);
-// $app->register(Illuminate\Mail\MailServiceProvider::class);
+// $App->register(Maatwebsite\Excel\ExcelServiceProvider::class);
+// $App->register(Illuminate\Mail\MailServiceProvider::class);
 $app->register(Illuminate\Redis\RedisServiceProvider::class);
 // class_alias('Illuminate\Support\Facades\Mail', 'Mail');
 $app->alias('session', 'Illuminate\Session\SessionManager');
@@ -107,13 +107,13 @@ $app->alias('session', 'Illuminate\Session\SessionManager');
 |
 */
 
-//$app->configureMonologUsing(function(Monolog\Logger $monoLog) use ($app){
+//$App->configureMonologUsing(function(Monolog\Logger $monoLog) use ($App){
 //    return $monoLog->pushHandler(
-//        new \Monolog\Handler\RotatingFileHandler($app->storagePath().'/logs/'.env('LOG_PREFIX').'.log',20)
+//        new \Monolog\Handler\RotatingFileHandler($App->storagePath().'/logs/'.env('LOG_PREFIX').'.log',20)
 //    );
 //});
 $app->router->group([
-    'namespace' => 'app\Http\Controllers',
+    'namespace' => 'App\Http\Controllers',
 ], function ($router) {
     require __DIR__.'/../routes/auth.php';
     require __DIR__.'/../routes/web.php';

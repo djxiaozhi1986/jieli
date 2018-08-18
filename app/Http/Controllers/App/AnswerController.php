@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\app;
+namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\libraries\HttpClient;

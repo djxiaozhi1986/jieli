@@ -16,7 +16,7 @@ $router->get('/', function () use ($router) {
 });
 
 $router->post('/upload_pic','ExampleController@editor_upload_pic');
-$router->group(['namespace' => 'app'], function($router) {
+$router->group(['namespace' => 'App'], function($router) {
     //公共类
     //发送短信
     $router->post('/common/msg/send','CommonController@send_message');
@@ -132,31 +132,31 @@ $router->group(['namespace' => 'app'], function($router) {
     $router->post('/answer/report','AnswerController@api_answer_report');
 
 });
-$router->group(['namespace' => 'admin'], function($router) {
+$router->group(['namespace' => 'Admin'], function($router) {
     //课程管理
-    $router->post('/admin/courses/save','CoursesController@save_course');
-    $router->get('/admin/courses/sections','CoursesController@get_course_sections');
-    $router->post('/admin/courses/sections/add','CoursesController@add_section');
-    $router->delete('/admin/courses/sections/del','CoursesController@del_section');
+    $router->post('/Admin/courses/save','CoursesController@save_course');
+    $router->get('/Admin/courses/sections','CoursesController@get_course_sections');
+    $router->post('/Admin/courses/sections/add','CoursesController@add_section');
+    $router->delete('/Admin/courses/sections/del','CoursesController@del_section');
     //课程列表 *************
-    $router->get('/admin/courses/list','CoursesController@get_courses_list');
+    $router->get('/Admin/courses/list','CoursesController@get_courses_list');
     //课程明细
-    $router->get('/admin/courses/detail','CoursesController@get_course_detail');
-    $router->delete('/admin/courses/del','CoursesController@del_course');
+    $router->get('/Admin/courses/detail','CoursesController@get_course_detail');
+    $router->delete('/Admin/courses/del','CoursesController@del_course');
     //讲师列表 *************
-    $router->get('/admin/lecturer/list','CoursesController@get_lecturer_list');
+    $router->get('/Admin/lecturer/list','CoursesController@get_lecturer_list');
     //上传文件
-    $router->post('/admin/upload','CoursesController@Upload');
-    $router->post('/admin/upload/audio','CoursesController@UploadAudio');
+    $router->post('/Admin/upload','CoursesController@Upload');
+    $router->post('/Admin/upload/audio','CoursesController@UploadAudio');
     //删除图片
-    $router->delete('/admin/removefile','CoursesController@RemoveFile');
+    $router->delete('/Admin/removefile','CoursesController@RemoveFile');
     //修改课程状态
-    $router->post('/admin/courses/editstatus','CoursesController@edit_course_status');
+    $router->post('/Admin/courses/editstatus','CoursesController@edit_course_status');
     //修改课程音频文件，停止直播
-    $router->post('/admin/courses/editaudio','CoursesController@edit_course_audio');
-    $router->post('/admin/lecturer/save','CoursesController@save_lecturer');
-    $router->delete('/admin/lecturer/del','CoursesController@del_lecturer');
-    $router->get('/admin/category/all','CoursesController@get_all_category');
+    $router->post('/Admin/courses/editaudio','CoursesController@edit_course_audio');
+    $router->post('/Admin/lecturer/save','CoursesController@save_lecturer');
+    $router->delete('/Admin/lecturer/del','CoursesController@del_lecturer');
+    $router->get('/Admin/category/all','CoursesController@get_all_category');
     //课程点赞记录
     //课程收藏记录
     //课程评论
