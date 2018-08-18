@@ -56,6 +56,15 @@ class Controller extends BaseController
         $file_type = end($fileArray);
         return in_array($file_type, $type);
     }
+    public function _isAudio($fileType)
+    {
+        //mp3 wma rm wav midi ape flac
+        $type = array("mp3", "wma", "rm", "wav","midi","ape","flac");
+        $fileType = strtolower($fileType);
+        $fileArray = explode("/", $fileType);
+        $file_type = end($fileArray);
+        return in_array($file_type, $type);
+    }
 
     /**
      * 将Null转换成""

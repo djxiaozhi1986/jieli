@@ -136,6 +136,8 @@ $router->group(['namespace' => 'admin'], function($router) {
     //课程管理
     $router->post('/admin/courses/save','CoursesController@save_course');
     $router->get('/admin/courses/sections','CoursesController@get_course_sections');
+    $router->post('/admin/courses/sections/add','CoursesController@add_section');
+    $router->delete('/admin/courses/sections/del','CoursesController@del_section');
     //课程列表 *************
     $router->get('/admin/courses/list','CoursesController@get_courses_list');
     //课程明细
@@ -145,6 +147,7 @@ $router->group(['namespace' => 'admin'], function($router) {
     $router->get('/admin/lecturer/list','CoursesController@get_lecturer_list');
     //上传文件
     $router->post('/admin/upload','CoursesController@Upload');
+    $router->post('/admin/upload/audio','CoursesController@UploadAudio');
     //删除图片
     $router->delete('/admin/removefile','CoursesController@RemoveFile');
     //修改课程状态

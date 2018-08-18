@@ -380,6 +380,42 @@ class CoursesController extends Controller{
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
     }
+
+
+    /**
+     * 上传文件（课程封皮，讲师头像）
+     * @param Request $request [description]
+     */
+    public function UploadAudio(Request $request){
+        if (!$request->hasFile('file')) {
+            $code = array('dec' => $this->http_file_err);
+        } else {
+            $file = $request->file('file');
+            if ($file->isValid()) {
+                //检查mime
+//                $fi = new \finfo(FILEINFO_MIME_TYPE);
+//                if (!$this->_isAudio($fi->file($file->getPathname()))) return response()->json(['dec' => $this->http_mime_err]);
+
+                // if(!$request->input('file_type')){
+                //     $path = $path . $request->input('file_type').'/';
+                // }else{
+                //     $path = $path;
+                // }
+                $path = config('C.FILE_URL');
+                $file_prefix = date("YmdHis").rand(100, 200);
+                $extension = $file->getClientOriginalExtension();
+                $filename = $file_prefix . '.' . $extension;
+                $file->move($path, $filename);
+                $avator = $path.$filename;
+                $code = array('dec' => $this->success,'data'=>$avator);
+            }else{
+                $code = array('dec' => $this->http_file_err);
+            }
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
     /**
      * 删除文件
      * @param Request $request [description]
@@ -591,5 +627,50 @@ class CoursesController extends Controller{
         $response = HttpClient::api_request($request_url,[],'POST',true);
         $code = json_decode($response);
         return response()->json($code);
+    }
+
+    public function add_section(Request $request){
+        $course_id = $request->input('course_id');
+        $audio_url = $request->input('audio_url');
+        $title = $request->input('title');
+        $price = $request->input('price');
+        $cion = $request->input('cion');
+        $order_index = $request->input('order_index');
+        if($course_id && $audio_url && $title){
+            $data['course_id'] = $course_id;
+            $data['audio_url'] = $audio_url;
+            $data['title'] = $title;
+            $data['price'] = $price??0;
+            $data['cion'] = $cion??0;
+            $data['order_index'] = $order_index??0;
+            $data['created_at'] = time();
+            $res = Sections::create($data);
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec'=>$this->error);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+    public function del_section(Request $request){
+        $id = $request->input('id');
+        if($id){
+            $res = Sections::where('section_id',$id)->delete();
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec'=>$this->error);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 }
