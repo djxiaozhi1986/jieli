@@ -5,7 +5,7 @@
  * Date: 2016/11/9
  * Time: 下午6:00
  */
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\auth;
 use App\Handler\Wechat\MessageHandler;
 use App\Http\Controllers\Controller;
 use App\libraries\Generate;

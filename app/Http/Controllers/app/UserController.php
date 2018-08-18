@@ -5,7 +5,7 @@
  * Date: 2018/7/5
  * Time: 下午5:45
  */
-namespace App\Http\Controllers\App;
+namespace App\Http\Controllers\app;
 
 use App\Http\Controllers\Controller;
 use App\libraries\HttpClient;
