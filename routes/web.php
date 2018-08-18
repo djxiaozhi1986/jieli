@@ -20,6 +20,8 @@ $router->group(['namespace' => 'App'], function($router) {
     //公共类
     //发送短信
     $router->post('/common/msg/send','CommonController@send_message');
+    //分类查询课程 *************
+    $router->get('/courses/clist','CoursesController@get_courses_by_category');
     //推荐课程列表 *************
     $router->get('/courses/recomlist','CoursesController@get_home_courses_list');
     //课程列表 *************
@@ -48,6 +50,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->post('/courses/footstay','CoursesController@foot_stay');
     //同类购买-new
     $router->get('/courses/similar','CoursesController@similar_course_list');
+    $router->get('/courses/comments/hot','CoursesController@get_hot_comments');
 
 
     //用户中心-修改密码 *************
@@ -84,6 +87,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/expert/class','UserController@api_expert_class');
     $router->get('/expert/list','UserController@api_expert_list');
     $router->get('/expert/invite','UserController@api_expert_invite');
+    $router->get('/expert/detail','UserController@get_lecturer_detail');
 
     $router->get('/user/info','UserController@api_get_userinfo');
 
@@ -149,6 +153,7 @@ $router->group(['namespace' => 'admin'], function($router) {
     $router->post('/admin/courses/editaudio','CoursesController@edit_course_audio');
     $router->post('/admin/lecturer/save','CoursesController@save_lecturer');
     $router->delete('/admin/lecturer/del','CoursesController@del_lecturer');
+    $router->get('/admin/category/all','CoursesController@get_all_category');
     //课程点赞记录
     //课程收藏记录
     //课程评论

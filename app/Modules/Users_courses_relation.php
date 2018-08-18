@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Users_courses_relation extends Model
 {
-    public $table = 'courses_users_relation';//数据库表名
+    public $table = 'courses_users_relaction';//数据库表名
     //数据库字段，白名单，只能查询此队列中的字段
     protected $fillable = ['relation_id', 'user_id', 'course_id', 'created_at'];
     public $primaryKey = "relation_id";//主键

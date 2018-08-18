@@ -17,11 +17,35 @@ use App\Modules\Lecturers;
 use App\Modules\Orders;
 use App\Modules\Praises;
 use App\Modules\Sections;
+use App\Modules\Users;
 use App\Modules\Users_courses_relation;
 use Illuminate\Http\Request;
 
 class CoursesController extends Controller{
 
+    /**
+     * 分类课程
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_courses_by_category(Request $request){
+        $page_index = $request->input('page_index')??1;//页码
+        $page_number = $request->input('page_number')??10;//每页显示
+        if($request->input('c_id')){
+            //初始化sql
+            $sql = Courses::where('status',1)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            $total = $sql->count();
+            $list = $sql->select('course_id','title','description','lecturer_name','cover','is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+            $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
     /***
      * 获取推荐课程列表
      * @param Request $request
@@ -122,7 +146,7 @@ class CoursesController extends Controller{
                     $result['description']=$course->description;
                     $result['lecturer_id']=$course->lecturer_id;
                     $result['lecturer_name']=$course->lecturer_name;
-                    $result['cion_price']=$course->cion_price;
+                    $result['coin_price']=$course->coin_price;
                     $result['now_price']=$course->now_price;
                     $result['cover']=$course->cover;
                     $result['is_home']=$course->is_home;
@@ -259,17 +283,45 @@ class CoursesController extends Controller{
                     $user_ids[] = $u['user_id'];
                 }
             }
-            $order_courses = Orders::whereIn('user_id',$user_ids)->where('order_status',1)->select('course_id')->orderBy('completed_at','desc')->skip(0)->take(5)->get()->toArray();
+            $order_courses = Orders::whereIn('user_id',$user_ids)->where('course_id',$request->input('course_id'))->where('order_status',1)->select('course_id')->orderBy('completed_at','desc')->skip(0)->take(5)->get()->toArray();
             $course_ids = [];
             foreach ($order_courses as $c){
                 if(!in_array($c['course_id'],$course_ids)){
                     $course_ids[] = $c['course_id'];
                 }
             }
-            $result = Courses::whereIn('course_id',$course_ids)->get()->toArray();
+            $result = Courses::whereIn('course_id',$course_ids)->select('course_id','title','description','lecturer_name','cover','is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+                ->get()->toArray();
             $code = array('dec'=>$this->success,'data'=>$result);
         }
         else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
+    /**
+     * 热门评论
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_hot_comments(Request $request){
+        if($request->input('course_id')){
+            $total = Comments::where('course_id',$request->input('course_id'))->count();
+            $overplus = 0;
+            $res = Comments::where('course_id',$request->input('course_id'))->orderBy('praise_count','desc')->skip(0)->take(5)->get()->toArray();
+            foreach ($res as $key=>$value){
+                //查询评论的评论
+                $children = $this->get_children_comments($value['comment_id']);
+                $res[$key]['childrens'] = $children;
+            }
+            if($total>=2){
+                $overplus = $total-2;
+            }
+            $code = array('dec'=>$this->success,'data'=>$res,'overplus'=>$overplus);
+        }else{
             $code = array('dec'=>$this->client_err);
         }
         $json_str = json_encode($code);
@@ -363,6 +415,8 @@ class CoursesController extends Controller{
                 $praise['created_at'] = time();
                 $res = Praises::create($praise);
                 if($res){
+                    //点赞叠加
+                    Courses::where('course_id',$request->input('course_id'))->increment('praise_count');
                     $code = array('dec'=>$this->success);
                 }else{
                     $code = array('dec'=>$this->error);
@@ -393,6 +447,8 @@ class CoursesController extends Controller{
                 $praise['created_at'] = time();
                 $res = Praises::create($praise);
                 if($res){
+                    //点赞叠加
+                    Comments::where('comment_id',$request->input('comment_id'))->increment('praise_count');
                     $code = array('dec'=>$this->success);
                 }else{
                     $code = array('dec'=>$this->error);
@@ -497,10 +553,26 @@ class CoursesController extends Controller{
                     ->leftJoin('courses','courses.course_id','favorites.course_id');
 
             $total = $sql->count();
-            $list = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.coin_price','courses.now_price','courses.created_at','courses.opened_at','courses.closed_at')
+            $result = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.coin_price','courses.now_price','courses.created_at','courses.opened_at','courses.closed_at','courses.is_oa')
                     ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
-
-            $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
+            foreach ($result as $key=>$value){
+                //计算课程状态
+                $now = time();
+                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                    //课程正在直播
+                    $result[$key]['status']=1;
+                }else if($now<$value['opened_at']){
+                    //未开始
+                    $result[$key]['status']=0;
+                }else if($now>$value['closed_at']){
+                    //已经结束
+                    $result[$key]['status']=2;
+                }else{
+                    //未知
+                    $result[$key]['status']=-1;
+                }
+            }
+            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
         }else{
             $code = array('dec'=>$this->client_err);
         }
@@ -601,13 +673,29 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Users_courses_relation::where('users_courses_relation.user_id',$request->input('login_user'));
+            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'));
             $total = $sql->count();
-            $result = $sql->where('courses.status',1)->orderBy('users_courses_relation.created_at','desc')
-                    ->leftJoin('courses','courses.course_id','users_courses_relation.course_id')
-                    ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','users_courses_relation.created_at')
+            $result = $sql->where('courses.status',1)->orderBy('courses_users_relaction.created_at','desc')
+                    ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id')
+                    ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa')
                     ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
-
+            foreach ($result as $key=>$value){
+                //计算课程状态
+                $now = time();
+                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                    //课程正在直播
+                    $result[$key]['status']=1;
+                }else if($now<$value['opened_at']){
+                    //未开始
+                    $result[$key]['status']=0;
+                }else if($now>$value['closed_at']){
+                    //已经结束
+                    $result[$key]['status']=2;
+                }else{
+                    //未知
+                    $result[$key]['status']=-1;
+                }
+            }
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
             return response()->json($code);
         }else{
@@ -626,13 +714,29 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Users_courses_relation::where('users_courses_relation.user_id',$request->input('login_user'));
+            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'));
             $total = $sql->count();
-            $result = $sql->where('courses.status',1)->where('is_live',1)->orderBy('users_courses_relation.created_at','desc')
-                ->leftJoin('courses','courses.course_id','users_courses_relation.course_id')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','users_courses_relation.created_at')
+            $result = $sql->where('courses.status',1)->where('is_live',1)->orderBy('courses_users_relaction.created_at','desc')
+                ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
-
+            foreach ($result as $key=>$value){
+                //计算课程状态
+                $now = time();
+                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                    //课程正在直播
+                    $result[$key]['status']=1;
+                }else if($now<$value['opened_at']){
+                    //未开始
+                    $result[$key]['status']=0;
+                }else if($now>$value['closed_at']){
+                    //已经结束
+                    $result[$key]['status']=2;
+                }else{
+                    //未知
+                    $result[$key]['status']=-1;
+                }
+            }
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
             return response()->json($code);
         }else{
@@ -651,13 +755,29 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Users_courses_relation::where('users_courses_relation.user_id',$request->input('login_user'));
+            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'));
             $total = $sql->count();
-            $result = $sql->where('courses.status',1)->where('is_good',1)->orderBy('users_courses_relation.created_at','desc')
-                ->leftJoin('courses','courses.course_id','users_courses_relation.course_id')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','users_courses_relation.created_at')
+            $result = $sql->where('courses.status',1)->where('is_good',1)->orderBy('courses_users_relaction.created_at','desc')
+                ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
-
+            foreach ($result as $key=>$value){
+                //计算课程状态
+                $now = time();
+                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                    //课程正在直播
+                    $result[$key]['status']=1;
+                }else if($now<$value['opened_at']){
+                    //未开始
+                    $result[$key]['status']=0;
+                }else if($now>$value['closed_at']){
+                    //已经结束
+                    $result[$key]['status']=2;
+                }else{
+                    //未知
+                    $result[$key]['status']=-1;
+                }
+            }
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
             return response()->json($code);
         }else{
@@ -720,7 +840,7 @@ class CoursesController extends Controller{
                 ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','foots.in_time')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
-            return response()->json($code);
+//            return response()->json($code);
         }else{
             $code = array('dec'=>$this->client_err);
         }
@@ -728,4 +848,5 @@ class CoursesController extends Controller{
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
     }
+
 }

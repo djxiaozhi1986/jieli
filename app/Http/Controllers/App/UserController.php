@@ -9,6 +9,7 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\libraries\HttpClient;
+use App\Modules\Courses;
 use App\Modules\Users;
 use Illuminate\Http\Request;
 
@@ -424,5 +425,32 @@ class UserController extends Controller{
             $code = array('dec'=>$this->client_err);
         }
         return response()->json($code);
+    }
+
+    /**
+     * 主讲人详情
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_lecturer_detail(Request $request){
+        if($request->input('user_id')){
+            $lecturer =Users::where('user_type',2)->where('user_id',$request->input('user_id'))->select('user_id','nick_name','user_title','real_name','user_level','user_face','phone','intro','award')->first();
+//            $lecturer = Users::where('user_id',$request->input('user_id'))->first();
+            if($lecturer){
+                //获取主讲课程
+                $lecturer['courses'] =Courses::where('lecturer_id',$request->input('user_id'))
+                    ->select('course_id','title','description','coin_price','now_price','cover','is_home','is_live','opened_at','closed_at','created_at','is_oa')
+                    ->skip(0)->take(3)->get()->toArray();
+                //相关问答？？？？
+                $code = array('dec' => $this->success, 'data' => $lecturer);
+            }else{
+                $code = array('dec'=>array('code'=>'060002','msg'=>'不存在的主讲人'));
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
     }
 }

@@ -419,6 +419,7 @@ class CoursesController extends Controller{
 //            $save_data['audio_url']     = $request->input('audio_url');
             $save_data['opened_at']     = $request->input('opened_at');
             $save_data['closed_at']     = $request->input('closed_at');
+            $save_data['c_id']     = $request->input('c_id');
             if($request->input('coin_price')){
                 $save_data['coin_price'] = $request->input('coin_price');
             }
@@ -435,6 +436,7 @@ class CoursesController extends Controller{
             if($request->input('is_oa')){
                 $save_data['is_oa'] = $request->input('is_oa');
             }
+
             $res = false;
             if($request->input('course_id')){
                 //修改
@@ -581,5 +583,13 @@ class CoursesController extends Controller{
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
+    }
+
+    public function get_all_category(Request $request){
+        $request_path = '/classify/allList';
+        $request_url = config('C.API_URL').$request_path;
+        $response = HttpClient::api_request($request_url,[],'POST',true);
+        $code = json_decode($response);
+        return response()->json($code);
     }
 }
