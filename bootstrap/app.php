@@ -66,11 +66,11 @@ $app->routeMiddleware([
     'wechat.oauth'=>\App\Http\Middleware\WechatMiddleware::class,
 ]);
 // $app->middleware([
-//    App\Http\Middleware\ExampleMiddleware::class
+//    app\Http\Middleware\ExampleMiddleware::class
 // ]);
 
 // $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
+//     'auth' => app\Http\Middleware\Authenticate::class,
 // ]);
 
 /*
@@ -113,7 +113,7 @@ $app->alias('session', 'Illuminate\Session\SessionManager');
 //    );
 //});
 $app->router->group([
-    'namespace' => 'App\Http\Controllers',
+    'namespace' => 'app\Http\Controllers',
 ], function ($router) {
     require __DIR__.'/../routes/auth.php';
     require __DIR__.'/../routes/web.php';

@@ -16,7 +16,7 @@ $router->get('/', function () use ($router) {
 });
 
 $router->post('/upload_pic','ExampleController@editor_upload_pic');
-$router->group(['namespace' => 'App'], function($router) {
+$router->group(['namespace' => 'app'], function($router) {
     //公共类
     //发送短信
     $router->post('/common/msg/send','CommonController@send_message');
