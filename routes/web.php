@@ -51,6 +51,7 @@ $router->group(['namespace' => 'App'], function($router) {
     //同类购买-new
     $router->get('/courses/similar','CoursesController@similar_course_list');
     $router->get('/courses/comments/hot','CoursesController@get_hot_comments');
+    $router->get('/courses/good','CoursesController@get_good_courses');
 
 
     //用户中心-修改密码 *************

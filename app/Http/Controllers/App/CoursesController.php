@@ -675,9 +675,9 @@ class CoursesController extends Controller{
             $page_number = $request->input('page_number')??10;//每页显示
             $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'));
             $total = $sql->count();
-            $result = $sql->where('courses.status',1)->orderBy('courses_users_relaction.created_at','desc')
+            $result = $sql->orderBy('courses_users_relaction.created_at','desc')
                     ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id')
-                    ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa')
+                    ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa','courses.coin_price','courses.now_price')
                     ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($result as $key=>$value){
                 //计算课程状态
@@ -714,10 +714,10 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'));
+            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'))->where('courses.is_live',1)
+                ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id');
             $total = $sql->count();
-            $result = $sql->where('courses.status',1)->where('is_live',1)->orderBy('courses_users_relaction.created_at','desc')
-                ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id')
+            $result = $sql->orderBy('courses_users_relaction.created_at','desc')
                 ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($result as $key=>$value){
@@ -755,11 +755,11 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'));
+            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'))->where('courses.is_good',1)
+                ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id');
             $total = $sql->count();
-            $result = $sql->where('courses.status',1)->where('is_good',1)->orderBy('courses_users_relaction.created_at','desc')
-                ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa')
+            $result = $sql->orderBy('courses_users_relaction.created_at','desc')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa','courses.coin_price','courses.now_price')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($result as $key=>$value){
                 //计算课程状态
@@ -779,10 +779,44 @@ class CoursesController extends Controller{
                 }
             }
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
-            return response()->json($code);
         }else{
             $code = array('dec'=>$this->client_err);
         }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+    /***
+     * 获取精品课程
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function get_good_courses(Request $request){
+            $page_index = $request->input('page_index')??1;//页码
+            $page_number = $request->input('page_number')??10;//每页显示
+            $sql = Courses::where('status',1)->where('is_good',1);
+            $total = $sql->count();
+            $result = $sql->orderBy('opened_at','desc')->orderBy('created_at','desc')
+                ->select('course_id','title','description','lecturer_name','cover','opened_at','closed_at','created_at','is_oa','coin_price','now_price')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+            foreach ($result as $key=>$value){
+                //计算课程状态
+                $now = time();
+                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                    //课程正在直播
+                    $result[$key]['status']=1;
+                }else if($now<$value['opened_at']){
+                    //未开始
+                    $result[$key]['status']=0;
+                }else if($now>$value['closed_at']){
+                    //已经结束
+                    $result[$key]['status']=2;
+                }else{
+                    //未知
+                    $result[$key]['status']=-1;
+                }
+            }
+            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
