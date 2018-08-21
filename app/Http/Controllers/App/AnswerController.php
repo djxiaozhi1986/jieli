@@ -140,13 +140,13 @@ class AnswerController extends Controller{
     }
     public function api_answer_reply_list(Request $request){
         $user_id = $request->input('login_user');
-        $qa_id = $request->input('qa_id');
+//        $qa_id = $request->input('qa_id');
         $answer_id = $request->input('answer_id');
-        $page_index = $request->input('page_index');
-        if($user_id && $qa_id && $answer_id && $page_index){
+//        $page_index = $request->input('page_index');
+        if($user_id && $answer_id){
             $request_path = '/answer/replyAnswerList';
             $request_url = config('C.API_URL').$request_path;
-            $params = ['user_id'=>$user_id,'qa_id'=>$qa_id,'answer_id'=>$answer_id,'page_index'=>$page_index];
+            $params = ['user_id'=>$user_id,'answer_id'=>$answer_id];
             $response = HttpClient::api_request($request_url,$params,'POST',true);
             $code = json_decode($response);
         }else{
