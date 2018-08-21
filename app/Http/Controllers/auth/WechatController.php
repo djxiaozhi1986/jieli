@@ -5,7 +5,7 @@
  * Date: 2016/11/9
  * Time: 下午6:00
  */
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\auth;
 use App\Handler\Wechat\MessageHandler;
 use App\Http\Controllers\Controller;
 use App\libraries\Generate;
@@ -204,10 +204,10 @@ class WechatController extends Controller
     public function session_set(Request $request)
     {
 //        // 写入一条数据至 session 中...
-////        app('session')->put('session_test','11123343445');
+////        App('session')->put('session_test','11123343445');
 //
-//        $app = new Application(config('wechat'));
-//        $notice = $app->notice;
+//        $App = new Application(config('wechat'));
+//        $notice = $App->notice;
 //        $user_open_id = 'oKy-DuDSSFWMY_Sslu3fdOSAer0E';
 //        $templateId = "zCT-gaEIWdG49JVbraJVsleDFlf6ycDy4XA21W6XIJc";
 //        $url = 'http://testai.netconcepts.cn/#/app/approve/from_my';

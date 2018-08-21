@@ -354,8 +354,8 @@ class CoursesController extends Controller{
             $file = $request->file('file');
             if ($file->isValid()) {
                 //检查mime
-                $fi = new \finfo(FILEINFO_MIME_TYPE);
-                if (!$this->_isImg($fi->file($file->getPathname()))) return response()->json(['dec' => $this->http_mime_err]);
+//                $fi = new \finfo(FILEINFO_MIME_TYPE);
+//                if (!$this->_isImg($fi->file($file->getPathname()))) return response()->json(['dec' => $this->http_mime_err]);
 
                 // if(!$request->input('file_type')){
                 //     $path = $path . $request->input('file_type').'/';

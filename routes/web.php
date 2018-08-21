@@ -132,7 +132,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->post('/answer/report','AnswerController@api_answer_report');
 
 });
-$router->group(['namespace' => 'admin'], function($router) {
+$router->group(['namespace' => 'Admin'], function($router) {
     //课程管理
     $router->post('/admin/courses/save','CoursesController@save_course');
     $router->get('/admin/courses/sections','CoursesController@get_course_sections');

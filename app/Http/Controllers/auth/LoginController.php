@@ -5,7 +5,7 @@
  * Date: 2018/6/28
  * Time: 下午3:32
  */
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\auth;
 
 use App\Http\Controllers\App\UserController;
 use App\Http\Controllers\Controller;

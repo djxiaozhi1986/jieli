@@ -1,6 +1,6 @@
 <?php
 
-$router->group(['namespace' => 'Auth'], function($router) {
+$router->group(['namespace' => 'auth'], function($router) {
 //    $app->get('/oauth/wechat/server', 'WechatController@server');
 //    $app->post('/oauth/wechat/server', 'WechatController@server');
 //    $app->get('/oauth/wechat/login', 'WechatController@oauth');
