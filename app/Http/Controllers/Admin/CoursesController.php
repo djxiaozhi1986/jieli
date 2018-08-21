@@ -553,6 +553,8 @@ class CoursesController extends Controller{
         if($request->input("course_id")){
             $res = Courses::where('course_id',$request->input("course_id"))->delete();
             if($res){
+                //删除章节
+                Sections::where('course_id',$request->input("course_id"))->delete();
                 $code = array('dec' => $this->success);
             }else{
                 $code = array('dec'=>$this->error);

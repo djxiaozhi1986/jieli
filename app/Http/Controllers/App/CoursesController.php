@@ -339,13 +339,13 @@ class CoursesController extends Controller{
             $sql = Sections::where('course_id',$course_id);
             $total = $sql->count();
             $sort = 'asc';
-            if(isset($request['sort'])){
-                if($request['sort']!=0){//正序
-                    $sort = 'desc';
-                }
+            $sort_str = $request->input('sort')??null;
+            if($sort_str!=null && $sort_str!=0){
+                //正序
+                $sort = 'desc';
             }
-            $sql = $sql->orderBy('order',$sort);
-            if(isset($request['page_index'])){
+            $sql = $sql->orderBy('order_index',$sort);
+            if($request->input('page_index')!=null){
                 $page_index = $request['page_index'];
                 $page_number = 10;
                 $sql = $sql->skip(($page_index - 1) * $page_number)->take($page_number);
