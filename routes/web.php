@@ -139,6 +139,7 @@ $router->group(['namespace' => 'Admin'], function($router) {
     $router->get('/admin/courses/sections','CoursesController@get_course_sections');
     $router->post('/admin/courses/sections/add','CoursesController@add_section');
     $router->delete('/admin/courses/sections/del','CoursesController@del_section');
+    $router->post('/admin/courses/publish','CoursesController@publish');
     //课程列表 *************
     $router->get('/admin/courses/list','CoursesController@get_courses_list');
     //课程明细

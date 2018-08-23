@@ -84,7 +84,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name','cover','coin_price','now_price','audio_url','opened_at','closed_at','created_at','is_publish')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
         foreach ($list as $key=>$value){
             //此微课的点赞数量
@@ -113,25 +113,107 @@ class CoursesController extends Controller{
     public function get_course_detail(Request $request){
         if($request->input('course_id')){
             $course = Courses::where('course_id',$request->input('course_id'))->first();
-            if($course) {
-                $result['course_id'] = $course->course_id;
-                $result['title'] = $course->title;
-                $result['description'] = $course->description;
-                $result['lecturer_id'] = $course->lecturer_id;
-                $result['lecturer_name'] = $course->lecturer_name;
-                $result['cover'] = $course->cover;
-                $result['coin_price'] = $course->coin_price;
-                $result['now_price'] = $course->now_price;
-                $result['audio_url'] = $course->audio_url;
-                $result['is_home'] = $course->is_home;
-                $result['is_good'] = $course->is_good;
-                $result['opened_at'] = $course->opened_at;
-                $result['opened_at_date'] = $course->opened_at;
-                $result['opened_at_time'] = $course->opened_at;
-                $result['closed_at'] = $course->closed_at;
-                $result['closed_at_date'] = $course->closed_at;
-                $result['closed_at_time'] = $course->closed_at;
-                $code = array('dec'=>$this->success,'data'=>$result);
+            if($course){
+                if($course->status==0){
+                    $code = array('dec'=>$this->course_disable_err);
+                }elseif ($course->status==2){
+                    $code = array('dec'=>$this->course_close_err);
+                }else{
+                    $result['course_id']=$course->course_id;
+                    $result['title']=$course->title;
+                    $result['description']=$course->description;
+                    $result['lecturer_id']=$course->lecturer_id;
+                    $result['lecturer_name']=$course->lecturer_name;
+                    $result['coin_price']=$course->coin_price;
+                    $result['now_price']=$course->now_price;
+                    if($course->cover){
+                        $result['cover']=config('C.DOMAIN').$course->cover;
+                    }
+                    $result['is_home']=$course->is_home;
+                    $result['is_live']=$course->is_live;
+                    $result['opened_at']=$course->opened_at;
+                    $result['closed_at']=$course->closed_at;
+                    $result['created_at']=$course->created_at;
+                    $result['is_oa']=$course->is_oa;//是否开源
+                    $result['is_publish']=$course->is_publish;//是否开源
+                    //计算课程是否是主讲人自己的课程
+                    $result['is_me']=0;
+                    $result['is_fav']= 0;
+                    $result['is_buy'] = 0;
+                    if($request->input('login_user')){
+                        if($request->input('login_user')==$course->lecturer_id){
+                            $result['is_me']=1;
+                        }else{
+                            //计算当前用户是否已经购买了此课程
+                            //微课订单中查看,不包含讲师自己，该课程该用户已经购买成功
+                            $order = Orders::where('course_id',$course->course_id)->where('user_id',$request->input('login_user'))->where('order_status',1)->first();
+                            if($order){
+                                $result['is_buy'] = 1;
+                            }
+                        }
+                        //判断是否收藏
+                        $fav = Favorites::where('course_id',$course->course_id)->where('user_id',$request->input('login_user'))->first();
+                        if($fav){
+                            $result['is_fav'] = 1;
+                        }
+                    }
+                    //判断是否为线下课程
+                    $result['is_online'] = 1;//线上
+                    $sec_count = Sections::where('course_id',$course->course_id)->count();
+                    if($sec_count>0){
+                        $result['is_online'] = 0;//线下
+                    }
+                    //计算课程状态
+                    $now = time();
+                    if($now<=$course->closed_at && $now>=$course->opened_at){
+                        //课程正在直播
+                        $result['status']=1;
+                    }else if($now<$course->opened_at){
+                        //未开始
+                        $result['status']=0;
+                    }else if($now>$course->closed_at){
+                        //已经结束
+                        $result['status']=2;
+                    }else{
+                        //未知
+                        $result['status']=-1;
+                    }
+
+                    //课程讲师信息
+                    if($course->lecturer_id){
+                        //获取讲师信息
+                        $lecturer = Users::where('user_type',2)->where('user_id',$course->lecturer_id)->select('user_id','nick_name','user_title','real_name','user_level','user_face','phone','intro','award')->first();
+//                        $lecturer = Lecturers::where('lecturer_id',$course->lecturer_id)->select('description','lecturer_avator')->first();
+                        if($lecturer){
+                            $result['lecturer_name']=$lecturer->real_name;
+                            $result['lecturer_avator']=$lecturer->user_face;
+                            $result['lecturer_phone']=$lecturer->phone;
+                            $result['lecturer_intro']=$lecturer->intro??'没有简介';
+                            $result['lecturer_award'] = $lecturer->award;
+                            $result['lecturer_title'] = $lecturer->user_title;
+                        }else{
+                            $result['lecturer_name']='';
+                            $result['lecturer_avator']='';
+                            $result['lecturer_phone']='';
+                            $result['lecturer_intro']='';
+                            $result['lecturer_award']='';
+                        }
+                    }
+                    //此微课的点赞数量
+                    $result['praise_num'] = Praises::where('course_id',$course->course_id)->count();
+                    //当前登录用户是否已经点过赞
+                    if($request->input('login_user')){
+                        $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$course->course_id)->exists();
+                        if($exits){
+                            $result['is_praise'] = 1;//已经点赞
+                        }else{
+                            $result['is_praise'] = 0;//未点赞
+                        }
+                    }
+                    $code = array('dec'=>$this->success,'data'=>$result);
+                }
+            }else{
+                $code = array('dec'=>$this->course_nothing_err);
             }
         }
         else{
@@ -663,6 +745,23 @@ class CoursesController extends Controller{
         $id = $request->input('id');
         if($id){
             $res = Sections::where('section_id',$id)->delete();
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec'=>$this->error);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+    public function publish(Request $request){
+        $course_id = $request->input('course_id');
+        if($course_id){
+            $data['is_publish'] = 1;
+            $res = Courses::where('course_id',$course_id)->update($data);
             if($res){
                 $code = array('dec' => $this->success);
             }else{

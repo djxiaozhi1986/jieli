@@ -20,6 +20,7 @@ use App\Modules\Sections;
 use App\Modules\Users;
 use App\Modules\Users_courses_relation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CoursesController extends Controller{
 
@@ -33,9 +34,9 @@ class CoursesController extends Controller{
         $page_number = $request->input('page_number')??10;//每页显示
         if($request->input('c_id')){
             //初始化sql
-            $sql = Courses::where('status',1)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            $sql = Courses::where('is_publish',1)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
             $total = $sql->count();
-            $list = $sql->select('course_id','title','description','lecturer_name','cover','is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover) as cover'),'is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
@@ -55,7 +56,7 @@ class CoursesController extends Controller{
         $page_index = $request->input('page_index')??1;//页码
         $page_number = $request->input('page_number')??10;//每页显示
         //初始化sql
-        $sql = Courses::where('status',1)->where('is_home',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+        $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
         //附加条件,模糊查询 课程标题、讲师姓名或昵称
         if($request->input('keyword')){
             $key = $request->input('keyword');
@@ -65,7 +66,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
 
 //        array_walk_recursive($list, $this->convertNull());
@@ -106,7 +107,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
         foreach ($list as $key=>$value){
             //此微课的点赞数量
@@ -148,7 +149,9 @@ class CoursesController extends Controller{
                     $result['lecturer_name']=$course->lecturer_name;
                     $result['coin_price']=$course->coin_price;
                     $result['now_price']=$course->now_price;
-                    $result['cover']=$course->cover;
+                    if($course->cover){
+                        $result['cover']=config('C.DOMAIN').$course->cover;
+                    }
                     $result['is_home']=$course->is_home;
                     $result['is_live']=$course->is_live;
                     $result['opened_at']=$course->opened_at;
@@ -290,7 +293,7 @@ class CoursesController extends Controller{
                     $course_ids[] = $c['course_id'];
                 }
             }
-            $result = Courses::whereIn('course_id',$course_ids)->select('course_id','title','description','lecturer_name','cover','is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $result = Courses::whereIn('course_id',$course_ids)->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->get()->toArray();
             $code = array('dec'=>$this->success,'data'=>$result);
         }
@@ -549,11 +552,11 @@ class CoursesController extends Controller{
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
             //初始化sql
-            $sql = Favorites::where('favorites.user_id',$request->input('login_user'))->where('courses.status',1)->orderBy('favorites.created_at','desc')
-                    ->leftJoin('courses','courses.course_id','favorites.course_id');
+            $sql = Favorites::where('courses_favorites.user_id',$request->input('login_user'))->where('courses.is_publish',1)->orderBy('courses_favorites.created_at','desc')
+                    ->leftJoin('courses','courses.course_id','courses_favorites.course_id');
 
             $total = $sql->count();
-            $result = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.coin_price','courses.now_price','courses.created_at','courses.opened_at','courses.closed_at','courses.is_oa')
+            $result = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.coin_price','courses.now_price','courses.created_at','courses.opened_at','courses.closed_at','courses.is_oa')
                     ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($result as $key=>$value){
                 //计算课程状态
@@ -590,11 +593,11 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Carts::where('carts.user_id',$request->input('login_user'));
+            $sql = Carts::where('courses_carts.user_id',$request->input('login_user'));
             $total = $sql->count();
-            $result = $sql->where('courses.status',1)->orderBy('carts.add_time','desc')
-                ->leftJoin('courses','courses.course_id','carts.course_id')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','carts.add_time')
+            $result = $sql->where('courses.status',1)->orderBy('courses_carts.add_time','desc')
+                ->leftJoin('courses','courses.course_id','courses_carts.course_id')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_carts.add_time')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
 
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
@@ -677,7 +680,7 @@ class CoursesController extends Controller{
             $total = $sql->count();
             $result = $sql->orderBy('courses_users_relaction.created_at','desc')
                     ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id')
-                    ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa','courses.coin_price','courses.now_price')
+                    ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa','courses.coin_price','courses.now_price')
                     ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($result as $key=>$value){
                 //计算课程状态
@@ -718,7 +721,7 @@ class CoursesController extends Controller{
                 ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id');
             $total = $sql->count();
             $result = $sql->orderBy('courses_users_relaction.created_at','desc')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($result as $key=>$value){
                 //计算课程状态
@@ -759,7 +762,7 @@ class CoursesController extends Controller{
                 ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id');
             $total = $sql->count();
             $result = $sql->orderBy('courses_users_relaction.created_at','desc')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa','courses.coin_price','courses.now_price')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa','courses.coin_price','courses.now_price')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($result as $key=>$value){
                 //计算课程状态
@@ -797,7 +800,7 @@ class CoursesController extends Controller{
             $sql = Courses::where('status',1)->where('is_good',1);
             $total = $sql->count();
             $result = $sql->orderBy('opened_at','desc')->orderBy('created_at','desc')
-                ->select('course_id','title','description','lecturer_name','cover','opened_at','closed_at','created_at','is_oa','coin_price','now_price')
+                ->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'opened_at','closed_at','created_at','is_oa','coin_price','now_price')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($result as $key=>$value){
                 //计算课程状态
