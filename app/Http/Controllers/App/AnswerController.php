@@ -28,10 +28,11 @@ class AnswerController extends Controller{
     }
     public function api_answer_detail(Request $request){
         $qa_id = $request->input('qa_id');
-        if($qa_id){
+        $user_id = $request->input('login_user');
+        if($qa_id && $user_id){
             $request_path = '/answer/detail';
             $request_url = config('C.API_URL').$request_path;
-            $params = ['qa_id'=>$qa_id];
+            $params = ['qa_id'=>$qa_id,'user_id'=>$user_id];
             $response = HttpClient::api_request($request_url,$params,'POST',true);
             $code = json_decode($response);
         }else{
