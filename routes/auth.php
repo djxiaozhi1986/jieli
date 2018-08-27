@@ -24,7 +24,8 @@ $router->group(['namespace' => 'auth'], function($router) {
     //注册
     $router->post('/oauth/register','LoginController@register');
     //登录
-    $router->post('/oauth/pwd','LoginController@pwd_login');
+//    $router->post('/oauth/pwd','LoginController@pwd_login');
+    $router->post('/oauth/pwd','LoginController@api_phone_login');
     $router->post('/oauth/verify','LoginController@verify_login');
 //    $router->post('/oauth/wechat',['middleware' => 'wechat.oauth','uses'=>'WechatController@wechat_login']);
 //    $router->post('/oauth/weibo','LoginController@weibo_login');

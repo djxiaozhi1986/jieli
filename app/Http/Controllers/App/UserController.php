@@ -401,22 +401,16 @@ class UserController extends Controller{
 //        birthday yyyy-MM-dd（非必填）
 //        sex 性别（非必填）
         $user_id = $request->input('login_user');
+        $email = $request->input('email');
+        $nick_name = $request->input('nick_name');
+        $real_name = $request->input('real_name');
+        $birthday = $request->input('birthday');
         if($user_id){
-            if($request->input('email')){
-                $params['email'] = $request->input('email');
-            }
-            if($request->input('nick_name')){
-                $params['nick_name'] = $request->input('nick_name');
-            }
-            if($request->input('real_name')){
-                $params['real_name'] = $request->input('real_name');
-            }
-            if($request->input('birthday')){
-                $params['birthday'] = $request->input('birthday');
-            }
-            if(isset($request['sex'])){
-                $params['sex'] = $request->input('sex');
-            }
+            $params['user_id'] =$user_id;
+            $params['email'] =$email;
+            $params['nick_name'] =$nick_name;
+            $params['real_name'] =$real_name;
+            $params['birthday'] =$birthday;
             $request_path = '/user/setinfo';
             $request_url = config('C.API_URL').$request_path;
             $response = HttpClient::api_request($request_url,$params,'POST',true);
