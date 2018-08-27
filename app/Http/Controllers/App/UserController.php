@@ -12,6 +12,7 @@ use App\libraries\HttpClient;
 use App\Modules\Courses;
 use App\Modules\Users;
 use Illuminate\Http\Request;
+use Cache;
 
 class UserController extends Controller{
     /***
@@ -28,18 +29,11 @@ class UserController extends Controller{
                 $random = Cache::get($u_phone);
                 //验证验证码
                 if ($u_random == $random || $u_random == 1234) {
-                    $user = Users::where('phone', $u_phone)->first();
-                    if (!empty($user)) {
-                        $user->password = md5(md5($u_pwd));
-                        $res = $user->save();
-                        if($res){
-                            $code = array('dec' => $this->success);
-                        }else{
-                            $code = array('dec' => $this->error);
-                        }
-                    } else{
-                        $code = array('dec' => $this->login_uname_err);
-                    }
+                    $request_path = '/user/getUserMobilePass';
+                    $request_url = config('C.API_URL').$request_path;
+                    $params = ['u_phone'=>$u_phone,'newpass'=>$u_pwd];
+                    $response = HttpClient::api_request($request_url,$params,'POST',true);
+                    $code = json_decode($response);
                 } else {
                     $code = array('dec' => $this->val_err);
                 }
@@ -295,20 +289,6 @@ class UserController extends Controller{
         return response()->json($code);
     }
     public function api_classify_edit(Request $request){
-        $user_id = $request->input('login_user');
-        $follow_id = $request->input('follow_id');
-        if($user_id && $follow_id){
-            $request_path = '/classify/update';
-            $request_url = config('C.API_URL').$request_path;
-            $params = ['user_id'=>$user_id,'follow_id'=>$follow_id];
-            $response = HttpClient::api_request($request_url,$params,'POST',true);
-            $code = json_decode($response);
-        }else{
-            $code = array('dec'=>$this->client_err);
-        }
-        return response()->json($code);
-    }
-    public function api_reset_pwd(Request $request){
         $user_id = $request->input('login_user');
         $follow_id = $request->input('follow_id');
         if($user_id && $follow_id){

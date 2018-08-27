@@ -36,7 +36,7 @@ class CoursesController extends Controller{
             //初始化sql
             $sql = Courses::where('is_publish',1)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
             $total = $sql->count();
-            $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover) as cover'),'is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover) as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
@@ -66,7 +66,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
 
 //        array_walk_recursive($list, $this->convertNull());
@@ -84,6 +84,80 @@ class CoursesController extends Controller{
             }
         }
         $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
+    /***
+     * 登录讲师的课程
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function get_lecturer_courses_list(Request $request){
+        $page_index = $request->input('page_index')??1;//页码
+        $page_number = $request->input('page_number')??10;//每页显示
+        $login_user = $request->input('login_user');//讲师id
+        if($login_user){
+            //初始化sql
+            $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish',1)->where('lecturer_id',$login_user)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            $total = $sql->count();
+            $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+            foreach ($list as $key=>$value){
+                //此微课的点赞数量
+                $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
+                //当前登录用户是否已经点过赞
+                if($request->input('login_user')){
+                    $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$value['course_id'])->exists();
+                    if($exits){
+                        $list[$key]['is_praise'] = 1;//已经点赞
+                    }else{
+                        $list[$key]['is_praise'] = 0;//未点赞
+                    }
+                }
+            }
+            $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+    /***
+     * 登录用户购买的课程
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function get_user_courses_list(Request $request){
+        $page_index = $request->input('page_index')??1;//页码
+        $page_number = $request->input('page_number')??10;//每页显示
+        $login_user = $request->input('login_user');//讲师id
+        if($login_user){
+            //初始化sql
+            $sql = Orders::where('courses_orders.user_id',$login_user)->where('courses_orders.order_status',1)->orderBy('courses_orders.completed_at','desc')
+                    ->leftJoin('courses','courses.course_id','courses_orders.course_id');
+            $total = $sql->count();
+            $list = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.is_live','courses.is_oa','courses.coin_price','courses.now_price','courses.audio_url','courses.opened_at','courses.closed_at','courses.created_at')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+            foreach ($list as $key=>$value){
+                //此微课的点赞数量
+                $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
+                //当前登录用户是否已经点过赞
+                if($request->input('login_user')){
+                    $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$value['course_id'])->exists();
+                    if($exits){
+                        $list[$key]['is_praise'] = 1;//已经点赞
+                    }else{
+                        $list[$key]['is_praise'] = 0;//未点赞
+                    }
+                }
+            }
+            $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
@@ -107,7 +181,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
         foreach ($list as $key=>$value){
             //此微课的点赞数量
@@ -293,7 +367,7 @@ class CoursesController extends Controller{
                     $course_ids[] = $c['course_id'];
                 }
             }
-            $result = Courses::whereIn('course_id',$course_ids)->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $result = Courses::whereIn('course_id',$course_ids)->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->get()->toArray();
             $code = array('dec'=>$this->success,'data'=>$result);
         }
