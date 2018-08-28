@@ -90,7 +90,7 @@ $router->group(['namespace' => 'App'], function($router) {
 
     $router->get('/expert/class','UserController@api_expert_class');
     $router->get('/expert/list','UserController@api_expert_list');
-    $router->get('/expert/invite','UserController@api_expert_invite');
+    $router->post('/expert/invite','UserController@api_expert_invite');
     $router->get('/expert/detail','UserController@get_lecturer_detail');
 
     $router->get('/user/info','UserController@api_get_userinfo');
