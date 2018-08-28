@@ -302,6 +302,19 @@ class UserController extends Controller{
         }
         return response()->json($code);
     }
+    public function api_classify_secondary(Request $request){
+        $c_id = $request->input('c_id');
+        $request_path = '/classify/getSecondary';
+        $request_url = config('C.API_URL').$request_path;
+        if($c_id){
+            $params = ['c_id'=>$c_id];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+        }else{
+            $response = HttpClient::api_request($request_url,["cid"=>null],'POST',true);
+        }
+        $code = json_decode($response);
+        return response()->json($code);
+    }
     public function api_expert_class(Request $request){
         $user_id = $request->input('login_user');
         if($user_id){

@@ -35,9 +35,30 @@ class CoursesController extends Controller{
         if($request->input('c_id')){
             //初始化sql
             $sql = Courses::where('is_publish',1)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            //附加条件,模糊查询 课程标题、讲师姓名或昵称
+            if($request->input('keyword')){
+                $key = $request->input('keyword');
+                $sql = $sql->where(function ($query) use($key){
+                    $query->where('title','like','%'.$key.'%')
+                        ->orWhere('lecturer_name','like','%'.$key.'%');
+                });
+            }
             $total = $sql->count();
             $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover) as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+            foreach ($list as $key=>$value){
+                //此微课的点赞数量
+                $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
+                //当前登录用户是否已经点过赞
+                if($request->input('login_user')){
+                    $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$value['course_id'])->exists();
+                    if($exits){
+                        $list[$key]['is_praise'] = 1;//已经点赞
+                    }else{
+                        $list[$key]['is_praise'] = 0;//未点赞
+                    }
+                }
+            }
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
             $code = array('dec'=>$this->client_err);
