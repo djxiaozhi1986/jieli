@@ -49,13 +49,12 @@ class CoursesController extends Controller{
             foreach ($list as $key=>$value){
                 //此微课的点赞数量
                 $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
+                $list[$key]['is_praise'] = 0;
                 //当前登录用户是否已经点过赞
                 if($request->input('login_user')){
                     $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$value['course_id'])->exists();
                     if($exits){
                         $list[$key]['is_praise'] = 1;//已经点赞
-                    }else{
-                        $list[$key]['is_praise'] = 0;//未点赞
                     }
                 }
             }
@@ -94,13 +93,12 @@ class CoursesController extends Controller{
         foreach ($list as $key=>$value){
             //此微课的点赞数量
             $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
+            $list[$key]['is_praise'] = 0;//未点赞
             //当前登录用户是否已经点过赞
             if($request->input('login_user')){
                 $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$value['course_id'])->exists();
                 if($exits){
                     $list[$key]['is_praise'] = 1;//已经点赞
-                }else{
-                    $list[$key]['is_praise'] = 0;//未点赞
                 }
             }
         }
@@ -128,13 +126,12 @@ class CoursesController extends Controller{
             foreach ($list as $key=>$value){
                 //此微课的点赞数量
                 $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
+                $list[$key]['is_praise'] = 0;//未点赞
                 //当前登录用户是否已经点过赞
                 if($request->input('login_user')){
                     $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$value['course_id'])->exists();
                     if($exits){
                         $list[$key]['is_praise'] = 1;//已经点赞
-                    }else{
-                        $list[$key]['is_praise'] = 0;//未点赞
                     }
                 }
             }
@@ -165,13 +162,12 @@ class CoursesController extends Controller{
             foreach ($list as $key=>$value){
                 //此微课的点赞数量
                 $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
+                $list[$key]['is_praise'] = 0;//未点赞
                 //当前登录用户是否已经点过赞
                 if($request->input('login_user')){
                     $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$value['course_id'])->exists();
                     if($exits){
                         $list[$key]['is_praise'] = 1;//已经点赞
-                    }else{
-                        $list[$key]['is_praise'] = 0;//未点赞
                     }
                 }
             }
@@ -207,13 +203,12 @@ class CoursesController extends Controller{
         foreach ($list as $key=>$value){
             //此微课的点赞数量
             $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
+            $list[$key]['is_praise'] = 0;//未点赞
             //当前登录用户是否已经点过赞
             if($request->input('login_user')){
                 $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$value['course_id'])->exists();
-                if($exits){
+                if($exits) {
                     $list[$key]['is_praise'] = 1;//已经点赞
-                }else{
-                    $list[$key]['is_praise'] = 0;//未点赞
                 }
             }
         }
@@ -318,13 +313,12 @@ class CoursesController extends Controller{
                     }
                     //此微课的点赞数量
                     $result['praise_num'] = Praises::where('course_id',$course->course_id)->count();
+                    $result['is_praise'] = 0;//未点赞
                     //当前登录用户是否已经点过赞
                     if($request->input('login_user')){
                         $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$course->course_id)->exists();
                         if($exits){
                             $result['is_praise'] = 1;//已经点赞
-                        }else{
-                            $result['is_praise'] = 0;//未点赞
                         }
                     }
                     $code = array('dec'=>$this->success,'data'=>$result);
