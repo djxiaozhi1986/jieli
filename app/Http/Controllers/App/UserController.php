@@ -317,15 +317,17 @@ class UserController extends Controller{
     }
     public function api_expert_class(Request $request){
         $user_id = $request->input('login_user');
-        if($user_id){
             $request_path = '/expert/expertClass';
             $request_url = config('C.API_URL').$request_path;
+
+        if($user_id){
             $params = ['user_id'=>$user_id];
-            $response = HttpClient::api_request($request_url,$params,'POST',true);
-            $code = json_decode($response);
         }else{
-            $code = array('dec'=>$this->client_err);
+            $params = ['user_id'=>null];
         }
+
+        $response = HttpClient::api_request($request_url,$params,'POST',true);
+        $code = json_decode($response);
         return response()->json($code);
     }
     public function api_expert_list(Request $request){
