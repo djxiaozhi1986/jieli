@@ -330,17 +330,20 @@ class UserController extends Controller{
     }
     public function api_expert_list(Request $request){
         $user_id = $request->input('login_user');
-        $page_index = $request->input('page_index');
+        $page_index = $request->input('page_index')??1;
         $forum_id = $request->input('forum_id');
-        if($user_id && $page_index && $forum_id){
-            $request_path = '/expert/list';
-            $request_url = config('C.API_URL').$request_path;
-            $params = ['user_id'=>$user_id,'page_index'=>$page_index];
-            $response = HttpClient::api_request($request_url,$params,'POST',true);
-            $code = json_decode($response);
-        }else{
-            $code = array('dec'=>$this->client_err);
+        $request_path = '/expert/list';
+        $request_url = config('C.API_URL').$request_path;
+        $params = ['page_index'=>$page_index];
+        if($user_id){
+            $params['user_id'] = $user_id;
         }
+        if($forum_id){
+            $params['forum_id'] = $forum_id;
+        }
+
+        $response = HttpClient::api_request($request_url,$params,'POST',true);
+        $code = json_decode($response);
         return response()->json($code);
     }
     public function api_expert_invite(Request $request){
