@@ -211,7 +211,7 @@ class AnswerController extends Controller{
         $answer_id = $request->input('answer_id');
         $answer_comment_id = $request->input('answer_comment_id');
         $inform_type = $request->input('inform_type');
-        if($user_id && $qa_id && $answer_id && $answer_comment_id && isset($inform_type)){
+        if($user_id && $qa_id && $answer_id && isset($inform_type)){
             $request_path = '/answer/report';
             $request_url = config('C.API_URL').$request_path;
             $params = ['user_id'=>$user_id,'qa_id'=>$qa_id,'answer_id'=>$answer_id,'inform_type'=>$inform_type];
