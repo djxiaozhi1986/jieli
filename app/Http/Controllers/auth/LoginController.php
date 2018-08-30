@@ -11,6 +11,7 @@ use App\Http\Controllers\App\UserController;
 use App\Http\Controllers\Controller;
 use App\libraries\HttpClient;
 use App\Modules\Users;
+use App\Modules\Users_tokens;
 use Illuminate\Http\Request;
 use Cache;
 
@@ -171,42 +172,38 @@ class LoginController extends Controller{
             //验证验证码
             if ($u_random == $random || $u_random == 1234) {
                 Cache::pull($u_phone);
-                $u_info = Users::select('user_id', 'user_token', 'user_token_expire', 'nickname', 'avator', 'phone')
-                    ->where('phone', $u_phone)
-                    ->first();
-                if (!empty($u_info)) {
-                    $user_id = $u_info->user_id;
-                    $u_token = $u_info->user_token;
-                    $u_token_expire = $u_info->user_token_expire;
-                    $u_nickname = $u_info->nickname;
-//                    $u_avator = $u_info->avator;
-                    $u_avator = config('C.DOMAIN').$u_info->avator;
-                    $u_phone = $u_info->phone;
-                    //token过期
-                    if (time() > $u_token_expire) {
-                        //重新生成
-                        $u_token = $this->create_token();
-                        $u_token_expire = time() + (7 * 24 * 3600);
-                        //更新至数据库
-                        $u_info->user_token = $u_token;
-                        $u_info->user_token_expire = $u_token_expire;
+                $user = Users::where('user_name', $u_phone)->first();
+                //获取用户详情
+                if($user) {
+                    //登录成功，获取token
+                    $u_token_info = Users_tokens::where('user_id', $user->user_id)->first();
+                    if ($u_token_info) {
+                        //验证是否过期
+                        if (time() > $u_token_info->user_token_expire) {
+                            $u_token_info->user_token = $this->create_token();
+                            $u_token_info->user_token_expire = time() + (7 * 24 * 3600);
+                            $u_token_info->save();
+                        }
+                        $user->u_token = $u_token_info->user_token;
+                        $user->u_token_expire = $u_token_info->user_token_expire;
+                    } else {
+                        //生成新的token
+                        $save_token['user_token'] = $this->create_token();
+                        $save_token['user_token_expire'] = time() + (7 * 24 * 3600);
+                        $save_token['user_id'] = $user->user_id;
+                        $row = Users_tokens::create($save_token);
+                        if ($row) {
+                            $user->u_token = $save_token['user_token'];
+                            $user->u_token_expire = $save_token['user_token_expire'];
+                        }
                     }
-                    $u_info->last_time = time();
-                    $u_info->last_ip = $request->getClientIp();
-                    $u_info->device_type = $u_device_type;
-                    $u_info->device_id = $u_device_id;
-                    $u_info->save();
-                } else if (empty($u_info)) {
-                    //注册用户
-//                    $u_avator="uploads/2016/11/1/head_normal.png";//默认头像
-                    $u_avator=config('C.DEFAULT_AVATOR');//默认头像
-                    $u_token = $this->create_token();
-                    $u_token_expire = time() + (7 * 24 * 3600);
-                    $user_id = Users::insertGetId(['username'=>$u_phone,'phone' => $u_phone, 'user_token' => $u_token, 'user_token_expire' => $u_token_expire, 'device_type' => $u_device_type, 'created_at' =>time(), 'is_bound' => 1,'avator'=>$u_avator]);
-                    $u_nickname="用户".$user_id;
                 }
-                $code = array('data' => array('u_id' => $user_id, 'u_token' => $u_token,'u_token_expire'=>$u_token_expire, 'u_nickname' => $u_nickname, 'u_avator' => $u_avator, 'u_phone' => $u_phone), 'dec' => $this->success);
-                return response()->json($code);
+                $user->user_pass = null;
+                $u = json_decode(json_encode($user),TRUE);
+                $code = array('dec'=>$this->success,'data'=>$u);
+                $json_str = json_encode($code);
+                $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+                return response()->json($res_json);
             } else {
                 return response()->json(['dec' => $this->client_err]);
             }
@@ -279,7 +276,43 @@ class LoginController extends Controller{
             $request_url = config('C.API_URL').$request_path;
             $params = ['u_phone'=>$u_phone,'u_pwd'=>$u_pwd];
             $response = HttpClient::api_request($request_url,$params,'POST',true);
-            $code = json_decode($response);
+            $user = null;
+            $res = json_decode($response);
+//            var_dump($res->dec->code);die;
+            if($res->dec->code=='000000'){
+                $user = $res->data;
+                if($user){
+//                    var_dump($user->user_id);die;
+                    //登录成功，获取token
+                    $u_token_info = Users_tokens::where('user_id',$user->user_id)->first();
+                    if($u_token_info){
+                        //验证是否过期
+                        if(time()>$u_token_info->user_token_expire){
+                            $u_token_info->user_token = $this->create_token();
+                            $u_token_info->user_token_expire = time() + (7 * 24 * 3600);
+                            $u_token_info->save();
+                        }
+                        $user->u_token = $u_token_info->user_token;
+                        $user->u_token_expire = $u_token_info->user_token_expire;
+                    }else{
+                        //生成新的token
+                        $save_token['user_token'] = $this->create_token();
+                        $save_token['user_token_expire'] = time() + (7 * 24 * 3600);
+                        $save_token['user_id'] = $user->user_id;
+                        $row = Users_tokens::create($save_token);
+                        if($row){
+                            $user->u_token = $save_token['user_token'];
+                            $user->u_token_expire = $save_token['user_token_expire'];
+                        }
+                    }
+                    $u = json_decode(json_encode($user),TRUE);
+                    $code = array('dec'=>$this->success,'data'=>$u);
+                }else{
+                    $code = json_decode($response);
+                }
+            }else{
+                $code = json_decode($response);
+            }
         }else{
             $code = array('dec'=>$this->client_err);
         }

@@ -35,5 +35,5 @@ $router->group(['namespace' => 'auth'], function($router) {
     $router->post('/bind','LoginController@bind');
 
     //中转接口
-    $router->post('/auth/pwd','LoginController@api_phone_login');
+//    $router->post('/oauth/pwd','LoginController@api_phone_login');
 });
