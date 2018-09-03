@@ -301,10 +301,10 @@ class CoursesController extends Controller{
                         if($lecturer){
                             $result['lecturer_name']=$lecturer->real_name;
                             if($lecturer->user_face){
-                                if(strpos($lecturer->user_face,'http')>=0){
+                                if(strpos($lecturer->user_face,"http")>=0){
                                     $result['lecturer_avator']=$lecturer->user_face;
                                 }else{
-                                    $result['lecturer_avator']='http://118.26.164.109:81/uploads/face/'.$lecturer->user_face;
+                                    $result['lecturer_avator']="http://118.26.164.109:81/uploads/face/".$lecturer->user_face;
                                 }
                             }else{
                                 $result['lecturer_avator']='';
