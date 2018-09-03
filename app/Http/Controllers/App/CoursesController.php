@@ -302,11 +302,10 @@ class CoursesController extends Controller{
                             $result['lecturer_name']=$lecturer->real_name;
                             if($lecturer->user_face){
                                 $index = strpos($lecturer->user_face,"http");
-                                var_dump($index);
-                                if($index>=0){
-                                    $result['lecturer_avator']=$lecturer->user_face;
-                                }else{
+                                if($index === false){
                                     $result['lecturer_avator']="http://118.26.164.109:81/uploads/face/".$lecturer->user_face;
+                                }else{
+                                    $result['lecturer_avator']=$lecturer->user_face;
                                 }
                             }else{
                                 $result['lecturer_avator']='';
