@@ -234,7 +234,10 @@ class CoursesController extends Controller{
                 }else{
                     $result['course_id']=$course->course_id;
                     $result['title']=$course->title;
-                    $result['description']=$course->description;
+//                    $result['description']=$course->description;
+                    $dec= htmlspecialchars_decode($course->description);//把一些预定义的 HTML 实体转换为字符
+                    $dec = str_replace("&nbsp;","",$dec);//将空格替换成空
+                    $result['description'] = strip_tags($dec);//函数剥去字符串中的 HTML、XML 以及 PHP 的标签,获取纯文本内容
                     $result['lecturer_id']=$course->lecturer_id;
                     $result['lecturer_name']=$course->lecturer_name;
                     $result['coin_price']=$course->coin_price;
@@ -269,6 +272,8 @@ class CoursesController extends Controller{
                             $result['is_fav'] = 1;
                         }
                     }
+                    //收藏总数
+                    $result['fav_count'] = Favorites::where('course_id',$course->course_id)->count();
                     //判断是否为线下课程
                     $result['is_online'] = 1;//线上
                     $sec_count = Sections::where('course_id',$course->course_id)->count();
@@ -298,9 +303,18 @@ class CoursesController extends Controller{
 //                        $lecturer = Lecturers::where('lecturer_id',$course->lecturer_id)->select('description','lecturer_avator')->first();
                         if($lecturer){
                             $result['lecturer_name']=$lecturer->real_name;
-                            $result['lecturer_avator']=$lecturer->user_face;
+                            if($lecturer->user_face){
+                                $index = strpos($lecturer->user_face,"http");
+                                if($index === false){
+                                    $result['lecturer_avator']="http://118.26.164.109:81/uploads/face/".$lecturer->user_face;
+                                }else{
+                                    $result['lecturer_avator']=$lecturer->user_face;
+                                }
+                            }else{
+                                $result['lecturer_avator']='';
+                            }
                             $result['lecturer_phone']=$lecturer->phone;
-                            $result['lecturer_intro']=$lecturer->intro??'没有简介';
+                            $result['lecturer_intro']=$lecturer->intro;
                             $result['lecturer_award'] = $lecturer->award;
                             $result['lecturer_title'] = $lecturer->user_title;
                         }else{

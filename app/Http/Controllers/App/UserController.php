@@ -445,6 +445,7 @@ class UserController extends Controller{
         $nick_name = $request->input('nick_name');
         $real_name = $request->input('real_name');
         $birthday = $request->input('birthday');
+        $user_face = $request->input('user_face');
         $sex = $request->input('sex');
         if($user_id){
             $params['user_id'] =$user_id;
@@ -453,6 +454,7 @@ class UserController extends Controller{
             $params['real_name'] =$real_name;
             $params['birthday'] =$birthday;
             $params['sex'] =$sex;
+            $params['user_face'] =$user_face;
             $request_path = '/user/setinfo';
             $request_url = config('C.API_URL').$request_path;
             $response = HttpClient::api_request($request_url,$params,'POST',true);
