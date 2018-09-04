@@ -54,6 +54,21 @@ class AnswerController extends Controller{
         }
         return response()->json($code);
     }
+    public function api_answer_user(Request $request){
+        $page_index = $request->input('page_index')??1;
+        $user_id = $request->input('login_user');
+        $type = $request->input('type');
+        if($page_index && $user_id && $type){
+            $request_path = '/answer/getUserAnswer';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['page_index'=>$page_index,'user_id'=>$user_id,'type'=>$type];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
     public function api_answer_add(Request $request){
         $user_id = $request->input('login_user');
         $reward = $request->input('reward');

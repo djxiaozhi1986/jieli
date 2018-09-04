@@ -140,6 +140,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->post('/answer/report','AnswerController@api_answer_report');
     //new
     $router->get('/answer/user/attention','AnswerController@api_answer_user_attention');
+    $router->get('/answer/user','AnswerController@api_answer_user');
 
 });
 $router->group(['namespace' => 'Admin'], function($router) {
