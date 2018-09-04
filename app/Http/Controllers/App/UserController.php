@@ -363,6 +363,48 @@ class UserController extends Controller{
         }
         return response()->json($code);
     }
+    public function api_sys_msg_detail(Request $request){
+        $user_id = $request->input('login_user');
+        $msg_id = $request->input('msg_id');
+        if($user_id && $msg_id){
+            $request_path = '/user/getSystemInforDetail';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id,'id'=>$msg_id];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function api_sys_msg_del(Request $request){
+        $user_id = $request->input('login_user');
+        $msg_id = $request->input('msg_id');
+        if($user_id && $msg_id){
+            $request_path = '/user/delSystemInfor';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id,'id'=>$msg_id];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function api_sys_msg_list(Request $request){
+        $user_id = $request->input('login_user');
+        $page_index = $request->input('page_index')??1;
+        if($user_id && $page_index){
+            $request_path = '/user/getSystemInfor';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id,'page_index'=>$page_index];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
     public function api_get_userinfo(Request $request){
         $user_id = $request->input('login_user');
         if($user_id){

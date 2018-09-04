@@ -95,6 +95,10 @@ $router->group(['namespace' => 'App'], function($router) {
 
     $router->get('/user/info','UserController@api_get_userinfo');
 
+    $router->get('/user/msg/list','UserController@api_sys_msg_list');
+    $router->delete('/user/msg/del','UserController@api_sys_msg_del');
+    $router->get('/user/msg/detail','UserController@api_sys_msg_detail');
+
 
     //购物车查询
     $router->get('/cart/my','CoursesController@my_cart');
@@ -134,6 +138,8 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/answer/reply/detail','AnswerController@api_answer_reply_detail');
     //
     $router->post('/answer/report','AnswerController@api_answer_report');
+    //new
+    $router->get('/answer/user/attention','AnswerController@api_answer_user_attention');
 
 });
 $router->group(['namespace' => 'Admin'], function($router) {
