@@ -365,7 +365,7 @@ class UserController extends Controller{
     }
     public function api_sys_msg_detail(Request $request){
         $user_id = $request->input('login_user');
-        $msg_id = $request->input('msg_id');
+        $msg_id = $request->input('id');
         if($user_id && $msg_id){
             $request_path = '/user/getSystemInforDetail';
             $request_url = config('C.API_URL').$request_path;
@@ -379,7 +379,7 @@ class UserController extends Controller{
     }
     public function api_sys_msg_del(Request $request){
         $user_id = $request->input('login_user');
-        $msg_id = $request->input('msg_id');
+        $msg_id = $request->input('id');
         if($user_id && $msg_id){
             $request_path = '/user/delSystemInfor';
             $request_url = config('C.API_URL').$request_path;
