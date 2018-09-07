@@ -96,7 +96,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/user/info','UserController@api_get_userinfo');
 
     $router->get('/user/msg/list','UserController@api_sys_msg_list');
-    $router->delete('/user/msg/del','UserController@api_sys_msg_del');
+    $router->post('/user/msg/del','UserController@api_sys_msg_del');
     $router->get('/user/msg/detail','UserController@api_sys_msg_detail');
 
 
@@ -105,7 +105,7 @@ $router->group(['namespace' => 'App'], function($router) {
     //添加到购物车
     $router->get('/cart/add','CoursesController@add_to_cart');
     //从购物车移除
-    $router->delete('/cart/del','CoursesController@del_from_cart');
+    $router->post('/cart/del','CoursesController@del_from_cart');
     //创建订单
     $router->post('/order/create','OrderController@create');
     //天鹅币支付
