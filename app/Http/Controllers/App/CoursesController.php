@@ -255,6 +255,7 @@ class CoursesController extends Controller{
                     $result['is_me']=0;
                     $result['is_fav']= 0;
                     $result['is_buy'] = 0;
+                    $result['is_try'] = $course->is_try;
                     if($request->input('login_user')){
                         if($request->input('login_user')==$course->lecturer_id){
                             $result['is_me']=1;

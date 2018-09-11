@@ -12,12 +12,15 @@ class AnswerController extends Controller{
         $follow_id = $request->input('follow_id');
         $order = $request->input('order');
         $qa_title = $request->input('qa_title');
-        if($user_id && $page_index && $order && $follow_id){
+        if($user_id && $page_index && $order){
             $request_path = '/answer/list';
             $request_url = config('C.API_URL').$request_path;
-            $params = ['user_id'=>$user_id,'page_index'=>$page_index,'follow_id'=>$follow_id,'order'=>$order];
+            $params = ['user_id'=>$user_id,'page_index'=>$page_index,'order'=>$order];
             if($qa_title){
                 $params['qa_title'] = $qa_title;
+            }
+            if($follow_id){
+                $params['follow_id'] = $follow_id;
             }
             $response = HttpClient::api_request($request_url,$params,'POST',true);
             $code = json_decode($response);

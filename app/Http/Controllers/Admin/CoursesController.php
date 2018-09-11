@@ -554,6 +554,9 @@ class CoursesController extends Controller{
             if($request->input('is_oa')){
                 $save_data['is_oa'] = $request->input('is_oa');
             }
+            if($request->input('is_try')){
+                $save_data['is_try'] = $request->input('is_try');
+            }
 
             $res = false;
             if($request->input('course_id')){
@@ -719,6 +722,7 @@ class CoursesController extends Controller{
         $title = $request->input('title');
         $price = $request->input('price');
         $cion = $request->input('cion');
+        $is_try = $request->input('is_try');
         $order_index = $request->input('order_index');
         if($course_id && $audio_url && $title){
             $data['course_id'] = $course_id;
@@ -726,6 +730,7 @@ class CoursesController extends Controller{
             $data['title'] = $title;
             $data['price'] = $price??0;
             $data['cion'] = $cion??0;
+            $data['is_try'] = $is_try??0;
             $data['order_index'] = $order_index??0;
             $data['created_at'] = time();
             $res = Sections::create($data);

@@ -56,6 +56,14 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/courses/user','CoursesController@get_user_courses_list');
 
 
+    /*微课分类*/
+    $router->get('/classify/we/first','CategorysController@getTopCategorys');
+    $router->get('/classify/we/user','CategorysController@get_user_categorys');
+    $router->get('/classify/we/user/add','CategorysController@add_user_category');
+    $router->get('/classify/we/user/del','CategorysController@del_user_category');
+    $router->get('/classify/we/secondary','CategorysController@getChildCategorys');
+
+
     //用户中心-修改密码 *************
     $router->post('/user/resetpwd','UserController@reset_pwd');
 //    $router->post('/user/resetpwd','UserController@api_reset_pwd');
@@ -168,7 +176,10 @@ $router->group(['namespace' => 'Admin'], function($router) {
     $router->post('/admin/courses/editaudio','CoursesController@edit_course_audio');
     $router->post('/admin/lecturer/save','CoursesController@save_lecturer');
     $router->delete('/admin/lecturer/del','CoursesController@del_lecturer');
-    $router->get('/admin/category/all','CoursesController@get_all_category');
+    $router->get('/admin/category/all','CategorysController@get_choise_all_categorys');
+    $router->get('/admin/category/manager','CategorysController@get_all_categorys');
+    $router->post('/admin/category/save','CategorysController@saveCategory');
+    $router->delete('/admin/category/del','CategorysController@delCategory');
     //课程点赞记录
     //课程收藏记录
     //课程评论
