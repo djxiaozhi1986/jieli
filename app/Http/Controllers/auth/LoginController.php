@@ -197,6 +197,20 @@ class LoginController extends Controller{
                             $user->u_token_expire = $save_token['user_token_expire'];
                         }
                     }
+                }else{
+                    $reg["user_name"] = $u_phone;
+                    $reg["phone"] = $u_phone;
+                    $reg["add_time"] = time();
+                    $reg["login_time"] = time();
+                    $id = Users::insertGetId($reg);
+                    //生成新的token
+                    $save_token['user_token'] = $this->create_token();
+                    $save_token['user_token_expire'] = time() + (7 * 24 * 3600);
+                    $save_token['user_id'] = $id;
+                    Users_tokens::create($save_token);
+
+                    $user = Users::where('user_id', $id)->first();
+
                 }
                 $user->user_pass = null;
                 $u = json_decode(json_encode($user),TRUE);
