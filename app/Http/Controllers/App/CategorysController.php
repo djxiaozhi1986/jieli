@@ -24,9 +24,9 @@ class CategorysController extends Controller{
         $res = Categorys::where('parent_id',0)->where('status',1)->select('category_id','category_name','sort')->orderBy('sort','asc')->get()->toArray();
         $data = [];
         foreach ($res as $key=>$value){
-            $item['c_id']= $value['category_id'];
-            $item['c_name']= $value['category_name'];
-            $item['sort_id']= $value['sort'];
+            $item['c_id']= $value['category_id']."";
+            $item['c_name']= $value['category_name']."";
+            $item['sort_id']= $value['sort']."";
             $data[] = $item;
         }
         $code = array('dec' => $this->success, 'data' => $data,'total'=>$total);
@@ -52,9 +52,9 @@ class CategorysController extends Controller{
         $res = $sql->select('category_id','category_name','parent_id')->orderBy('sort','asc')->get()->toArray();
         $data = [];
         foreach ($res as $key=>$value){
-            $item['c_id']= $value['parent_id'];
-            $item['forum_name']= $value['category_name'];
-            $item['forum_id']= $value['category_id'];
+            $item['c_id']= $value['parent_id']."";
+            $item['forum_name']= $value['category_name']."";
+            $item['forum_id']= $value['category_id']."";
             $data[] = $item;
         }
         $code = array('dec' => $this->success, 'data' => $data,'total'=>$total);
@@ -85,6 +85,12 @@ class CategorysController extends Controller{
             }else{
                 //取默认分类
                 $data = Categorys::where('is_default',1)->where('status',1)->where('parent_id',0)->select('category_name as c_name','category_id as c_id')->get()->toArray();
+            }
+            $result = [];
+            foreach ($data as $key=>$value){
+                $item['c_name']= $value['c_name']."";
+                $item['c_id']= $value['c_id']."";
+                $result[] = $item;
             }
             $code = array('dec' => $this->success,'data'=>$data);
         }else{
