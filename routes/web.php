@@ -59,8 +59,8 @@ $router->group(['namespace' => 'App'], function($router) {
     /*微课分类*/
     $router->get('/classify/we/first','CategorysController@getTopCategorys');
     $router->get('/classify/we/user','CategorysController@get_user_categorys');
-    $router->get('/classify/we/user/add','CategorysController@add_user_category');
-    $router->get('/classify/we/user/del','CategorysController@del_user_category');
+    $router->post('/classify/we/user/add','CategorysController@add_user_category');
+    $router->post('/classify/we/user/del','CategorysController@del_user_category');
     $router->get('/classify/we/secondary','CategorysController@getChildCategorys');
 
 
