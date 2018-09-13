@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Categorys;
 use App\Modules\UserCategorys;
 use Illuminate\Http\Request;
+use Overtrue\Socialite\User;
 
 class CategorysController extends Controller{
 
@@ -70,11 +71,12 @@ class CategorysController extends Controller{
     public function get_user_categorys(Request $request){
         $user_id = $request->input('login_user');
         if($user_id){
-            $res = UserCategorys::where('user_id',$user_id)->select('p_id')->get()->toArray();
+            $res = UserCategorys::where('user_id',$user_id)->select('c_id')->get()->toArray();
+//            $res = UserCategorys::where('user_id',$user_id)->select('p_id')->get()->toArray();
             if(count($res)>0){
-                $pids = array_flatten($res);
+                $cids = array_flatten($res);
                 $data = Categorys::select('category_name as c_name','category_id as c_id')
-                    ->whereIn('category_id',$pids)
+                    ->whereIn('category_id',$cids)
                     ->orWhere(function($query)
                     {
                         $query->where('is_default', 1)
@@ -109,11 +111,11 @@ class CategorysController extends Controller{
     public function add_user_category(Request $request){
         $user_id = $request->input('login_user');
         $c_id = $request->input('c_id');
-        $p_id = $request->input('p_id');
-        if($user_id && $c_id && $p_id){
+//        $p_id = $request->input('p_id');
+        if($user_id && $c_id){
             $data['user_id'] = $user_id;
             $data['c_id'] = $c_id;
-            $data['p_id'] = $p_id;
+//            $data['p_id'] = $p_id;
             $data['created_at'] = time();
             // 通过属性找到相匹配的数据并更新，如果不存在即创建
             $res = UserCategorys::updateOrCreate(array('user_id' => $user_id,'c_id'=>$c_id), $data);
