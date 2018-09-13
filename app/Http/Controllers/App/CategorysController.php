@@ -142,7 +142,7 @@ class CategorysController extends Controller{
         if($user_id && $c_id){
             $data['user_id'] = $user_id;
             $data['c_id'] = $c_id;
-            $res = UserCategorys::wehre('user_id',$user_id)->where('c_id',$c_id)->delete();
+            $res = UserCategorys::where('user_id',$user_id)->where('c_id',$c_id)->delete();
             if($res){
                 $code = array('dec' => $this->success);
             }else{
