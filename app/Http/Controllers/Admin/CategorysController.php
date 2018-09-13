@@ -75,6 +75,7 @@ class CategorysController extends Controller{
             if($value['parent_id']==0){
                 $item['title'] = $value['category_name'];
                 $item['id'] = $value['category_id'];
+                $item['is_default'] = $value['is_default'];
                 $item['expand']=true;
                 $item['pname'] = '顶级分类';
                 $item['parent_id'] = $value['parent_id'];
@@ -106,6 +107,7 @@ class CategorysController extends Controller{
         $c_name = $request->input('cname');
         $c_sort = $request->input('csort');
         $is_default = $request->input('is_default');
+//        var_dump($is_default);
         if($c_name){
             $c_id = $request->input('id');
             $data['category_name'] = $c_name;
@@ -122,7 +124,7 @@ class CategorysController extends Controller{
                 $res = Categorys::where('category_id',$c_id)->update($data);
             }
             if($res){
-                $code = array('dec'=>$this->success);
+                $code = array('dec'=>$this->success,'data'=>$is_default);
             }else{
                 $code = array('dec'=>$this->error);
             }
@@ -166,7 +168,7 @@ class CategorysController extends Controller{
             if($value['parent_id']==0){
                 $item['label'] = $value['category_name'];
                 $item['value'] = $value['category_id'];
-                $item['children'] = $this->get_choise_childres($value['category_id'],$res);
+//                $item['children'] = $this->get_choise_childres($value['category_id'],$res);
                 $data[] = $item;
             }
         }

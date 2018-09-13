@@ -34,7 +34,7 @@ class CoursesController extends Controller{
         $page_number = $request->input('page_number')??10;//每页显示
         if($request->input('c_id')){
             //初始化sql
-            $sql = Courses::where('is_publish',1)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            $sql = Courses::where('is_publish','=',1)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
             //附加条件,模糊查询 课程标题、讲师姓名或昵称
             if($request->input('keyword')){
                 $key = $request->input('keyword');
@@ -76,7 +76,7 @@ class CoursesController extends Controller{
         $page_index = $request->input('page_index')??1;//页码
         $page_number = $request->input('page_number')??10;//每页显示
         //初始化sql
-        $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+        $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish','=',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
         //附加条件,模糊查询 课程标题、讲师姓名或昵称
         if($request->input('keyword')){
             $key = $request->input('keyword');
@@ -119,7 +119,7 @@ class CoursesController extends Controller{
         $login_user = $request->input('login_user');//讲师id
         if($login_user){
             //初始化sql
-            $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish',1)->where('lecturer_id',$login_user)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish','=',1)->where('lecturer_id',$login_user)->orderBy('opened_at','desc')->orderBy('created_at','desc');
             $total = $sql->count();
             $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
