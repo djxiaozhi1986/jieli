@@ -146,7 +146,7 @@ class CategorysController extends Controller{
             if($res){
                 $code = array('dec' => $this->success);
             }else{
-                $code = array('dec' => $this->error);
+                $code = array('dec' => $this->success);
             }
         }else{
             $code = array('dec' => $this->client_err);

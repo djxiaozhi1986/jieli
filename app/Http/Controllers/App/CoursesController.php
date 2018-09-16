@@ -418,11 +418,22 @@ class CoursesController extends Controller{
         if($request->input('course_id')){
             $total = Comments::where('course_id',$request->input('course_id'))->count();
             $overplus = 0;
-            $res = Comments::where('course_id',$request->input('course_id'))->orderBy('praise_count','desc')->skip(0)->take(5)->get()->toArray();
+            $res = Comments::where('course_id',$request->input('course_id'))
+                    ->select('courses_comments.*','praise_count as praise_number',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+                    ->leftJoin('user','user.user_id','courses_comments.from_user')
+                    ->orderBy('praise_count','desc')->skip(0)->take(5)->get()->toArray();
             foreach ($res as $key=>$value){
                 //查询评论的评论
                 $children = $this->get_children_comments($value['comment_id']);
                 $res[$key]['childrens'] = $children;
+                $res[$key]['is_praise'] = 0;//未点赞
+                //当前登录用户是否已经点过赞
+                if($request->input('login_user')){
+                    $exits = Praises::where('from_user',$request->input('login_user'))->where('comment_id',$value['comment_id'])->exists();
+                    if($exits) {
+                        $res[$key]['is_praise'] = 1;//已经点赞
+                    }
+                }
             }
             if($total>=2){
                 $overplus = $total-2;
@@ -479,7 +490,9 @@ class CoursesController extends Controller{
             $page_number = $request->input('page_number')??5;
             $sql = Comments::where('course_id',$request->input('course_id'))->whereNull('parent_id');
             $total = $sql->count();
-            $list =$sql->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+            $list =$sql ->select('courses_comments.*',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+                ->leftJoin('user','user.user_id','courses_comments.from_user')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             //查询列表的回复列表
             foreach($list as $key=>$value){
                 //此评论的点赞数量
@@ -493,6 +506,8 @@ class CoursesController extends Controller{
                         $list[$key]['is_praise'] = 0;//未点赞
                     }
                 }
+                //获取用户头像
+                $list[$key]['from_user_face'] = $this->get_user_face($value['from_user']);
                 //此条评论的评论
                 $list[$key]['childrens']  = $this->get_children_comments($value['comment_id']);
             }
@@ -577,6 +592,7 @@ class CoursesController extends Controller{
         if($request->input('course_id') && $request->input('login_user')){
             $savedata['course_id'] = $request->input('course_id');
             $savedata['from_user'] = $request->input('login_user');
+            $savedata['from_user_name'] = $this->get_user_nick_name($savedata['from_user']);
             $savedata['content'] = $request->input('content');
             if($request->input('comment_id')){
                 //针对于某条评论进行评论
@@ -584,6 +600,7 @@ class CoursesController extends Controller{
                 //针对于某条评论的评论进行评论
                 if($request->input('to_user')){
                     $savedata['to_user'] = $request->input('to_user');
+                    $savedata['to_user_name'] = $this->get_user_nick_name($savedata['to_user']);
                 }
             }
             $savedata['created_at'] = time();
@@ -600,7 +617,14 @@ class CoursesController extends Controller{
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
     }
-
+    private function get_user_nick_name($user_id){
+        $u = Users::where('user_id',$user_id)->select('nick_name')->first();
+        return $u->nick_name;
+    }
+    private function get_user_face($user_id){
+        $u = Users::where('user_id',$user_id)->select('user_face')->first();
+        return config('C.DOMAIN').$u->user_face;
+    }
     /***
      * 添加到收藏列表
      * @param Request $request
@@ -766,7 +790,9 @@ class CoursesController extends Controller{
     private function get_children_comments($parent_id){
         $result = array();
         if($parent_id){
-            $result = Comments::where('parent_id',$parent_id)->select('content','from_user','from_user_name','to_user','to_user_name','created_at')->get()->toArray();
+            $result = Comments::where('parent_id',$parent_id)
+                ->select('courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+                ->leftJoin('user','user.user_id','courses_comments.from_user')->get()->toArray();
         }
         return $result;
     }
