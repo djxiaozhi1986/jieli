@@ -32,6 +32,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/courses/sections','CoursesController@get_course_sections');
     //课程评论列表 *************
     $router->get('/courses/comments','CoursesController@get_course_comments');
+    $router->get('/courses/comments/children','CoursesController@get_comment_children');
     //发表评论 *************
     $router->post('/courses/comment','CoursesController@add_course_comment');
     //微课点赞 *************
@@ -61,6 +62,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/classify/we/user','CategorysController@get_user_categorys');
     $router->post('/classify/we/user/add','CategorysController@add_user_category');
     $router->post('/classify/we/user/del','CategorysController@del_user_category');
+    $router->post('/classify/we/user/edit','CategorysController@up_user_category');
     $router->get('/classify/we/secondary','CategorysController@getChildCategorys');
 
 

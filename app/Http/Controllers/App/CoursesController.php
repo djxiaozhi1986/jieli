@@ -507,7 +507,49 @@ class CoursesController extends Controller{
                     }
                 }
                 //获取用户头像
-                $list[$key]['from_user_face'] = $this->get_user_face($value['from_user']);
+//                $list[$key]['from_user_face'] = $this->get_user_face($value['from_user']);
+                //此条评论的评论
+                $list[$key]['childrens']  = $this->get_children_comments($value['comment_id']);
+            }
+            $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
+    /***
+     * 获取评论的评论评论列表(N条)
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function get_comment_children(Request $request){
+        if($request->input('comment_id')){
+            //查询只针对课程的评价
+            $page_index = $request->input('page_index')??1;//页码
+            $page_number = $request->input('page_number')??5;
+            $sql = Comments::where('parent_id',$request->input('comment_id'));
+            $total = $sql->count();
+            $list =$sql ->select('courses_comments.*',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+                ->leftJoin('user','user.user_id','courses_comments.from_user')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+            //查询列表的回复列表
+            foreach($list as $key=>$value){
+                //此评论的点赞数量
+                $list[$key]['praise_num'] = Praises::where('comment_id',$value['comment_id'])->count();
+                //当前登录用户是否已经点过赞
+                if($request->input('login_user')){
+                    $exits = Praises::where('from_user',$request->input('login_user'))->where('comment_id',$value['comment_id'])->exists();
+                    if($exits){
+                        $list[$key]['is_praise'] = 1;//已经点赞
+                    }else{
+                        $list[$key]['is_praise'] = 0;//未点赞
+                    }
+                }
+                //获取用户头像
+//                $list[$key]['from_user_face'] = $this->get_user_face($value['from_user']);
                 //此条评论的评论
                 $list[$key]['childrens']  = $this->get_children_comments($value['comment_id']);
             }

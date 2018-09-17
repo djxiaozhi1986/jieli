@@ -102,7 +102,40 @@ class CategorysController extends Controller{
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
     }
-
+    /**
+     * 用户修改微课分类
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function up_user_category(Request $request){
+        $user_id = $request->input('login_user');
+        $c_id = $request->input('c_id');
+//        $p_id = $request->input('p_id');
+        if($user_id && $c_id){
+            $data['user_id'] = $user_id;
+            $data['c_id'] = $c_id;
+//            $data['p_id'] = $p_id;
+            $data['created_at'] = time();
+            $uc = UserCategorys::where('user_id',$user_id)->where('c_id',$c_id)->first();
+            $res = false;
+            if($uc){
+                //删除
+                $res = UserCategorys::where('user_id',$user_id)->where('c_id',$c_id)->delete();
+            }else{
+                $res = UserCategorys::create($data);
+            }
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec' => $this->error);
+            }
+        }else{
+            $code = array('dec' => $this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
     /**
      * 用户添加微课分类
      * @param Request $request
