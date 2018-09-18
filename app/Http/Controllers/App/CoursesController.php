@@ -844,7 +844,7 @@ class CoursesController extends Controller{
             foreach ($result as $key=>$value){
                 $value['mdate'] = $this->mdate($value['created_at']);
                 $childrens[] = $value;
-                $total++;
+//                $total++;
                 //评论加到同级别
                 $this->get_children_comments($value['comment_id'],$childrens,$total);
             }
