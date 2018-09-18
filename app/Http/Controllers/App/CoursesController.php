@@ -427,6 +427,7 @@ class CoursesController extends Controller{
                 $children = $this->get_children_comments($value['comment_id']);
                 $res[$key]['childrens'] = $children;
                 $res[$key]['is_praise'] = 0;//未点赞
+                $res[$key]['mdate'] = $this->mdate($value['created_at']);
                 //当前登录用户是否已经点过赞
                 if($request->input('login_user')){
                     $exits = Praises::where('from_user',$request->input('login_user'))->where('comment_id',$value['comment_id'])->exists();
@@ -495,8 +496,7 @@ class CoursesController extends Controller{
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             //查询列表的回复列表
             foreach($list as $key=>$value){
-                //此评论的点赞数量
-//                $list[$key]['praise_num'] = Praises::where('comment_id',$value['comment_id'])->count();
+                $list[$key]['mdate'] = $this->mdate($value['created_at']);
                 //当前登录用户是否已经点过赞
                 if($request->input('login_user')){
                     $exits = Praises::where('from_user',$request->input('login_user'))->where('comment_id',$value['comment_id'])->exists();
@@ -537,6 +537,7 @@ class CoursesController extends Controller{
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             //查询列表的回复列表
             foreach($list as $key=>$value){
+                $list[$key]['mdate'] = $this->mdate($value['created_at']);
                 //此评论的点赞数量
 //                $list[$key]['praise_num'] = Praises::where('comment_id',$value['comment_id'])->count();
                 //当前登录用户是否已经点过赞
@@ -835,6 +836,9 @@ class CoursesController extends Controller{
             $result = Comments::where('parent_id',$parent_id)
                 ->select('courses_comments.comment_id','courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at','courses_comments.praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')->get()->toArray();
+            foreach ($result as $key=>$value){
+                $result[$key]['mdate'] = $this->mdate($value['created_at']);
+            }
         }
         return $result;
     }
