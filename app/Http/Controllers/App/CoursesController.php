@@ -425,7 +425,7 @@ class CoursesController extends Controller{
             foreach ($res as $key=>$value){
                 //查询评论的评论
                 $list[$key]['childrens']=[];
-                $this->get_children_comments($value['comment_id'],$res[$key]['childrens'],$total);
+                $this->get_children_comments($value['comment_id'],$res[$key]['childrens']);
 //                $res[$key]['childrens'] = $children;
                 $res[$key]['is_praise'] = 0;//未点赞
                 $res[$key]['mdate'] = $this->mdate($value['created_at']);
@@ -513,9 +513,11 @@ class CoursesController extends Controller{
 //                $list[$key]['childrens']  = $this->get_children_comments($value['comment_id']);
 
                 $list[$key]['childrens']=[];
-                $this->get_children_comments($value['comment_id'],$list[$key]['childrens'],$total);
+                $this->get_children_comments($value['comment_id'],$list[$key]['childrens']);
             }
-            $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total);
+            $con_sum = 0;
+            $this->get_comment_sum($request->input('course_id'),$con_sum,1);
+            $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total,'con_sum'=>$con_sum);
         }else{
             $code = array('dec'=>$this->client_err);
         }
@@ -557,10 +559,12 @@ class CoursesController extends Controller{
 //                $list[$key]['from_user_face'] = $this->get_user_face($value['from_user']);
                 //此条评论的评论
                 $list[$key]['childrens']=[];
-                $this->get_children_comments($value['comment_id'],$list[$key]['childrens'],$total);
+                $this->get_children_comments($value['comment_id'],$list[$key]['childrens']);
 
             }
-            $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total);
+            $con_sum = 0;
+            $this->get_comment_sum($request->input('comment_id'),$con_sum,2);
+            $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total,'con_sum'=>$con_sum);
         }else{
             $code = array('dec'=>$this->client_err);
         }
@@ -836,7 +840,7 @@ class CoursesController extends Controller{
         return response()->json($code);
     }
 
-    private function get_children_comments($parent_id,&$childrens,&$total){
+    private function get_children_comments($parent_id,&$childrens){
         if($parent_id){
             $result = Comments::where('parent_id',$parent_id)
                 ->select('courses_comments.comment_id','courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at','courses_comments.praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
@@ -844,9 +848,35 @@ class CoursesController extends Controller{
             foreach ($result as $key=>$value){
                 $value['mdate'] = $this->mdate($value['created_at']);
                 $childrens[] = $value;
-//                $total++;
                 //评论加到同级别
-                $this->get_children_comments($value['comment_id'],$childrens,$total);
+                $this->get_children_comments($value['comment_id'],$childrens);
+            }
+        }
+    }
+    private function get_comment_sum($id,&$con_sum,$type){
+        $sql = Comments::select('comment_id');
+        if($type==1){
+            //课程所有评论
+            $sql = $sql->where('course_id',$id);
+            $con_sum = $sql->count();
+        }
+        else{
+            //评论的评论
+            $sql = $sql->where('parent_id',$id);
+            $res = $sql->get()->toArray();
+            foreach ($res as $value){
+                $con_sum++;
+                $this->get_sum_children($value['comment_id'],$con_sum);
+            }
+        }
+    }
+    private function get_sum_children($parent_id,&$con_sum){
+        if($parent_id){
+            $result = Comments::where('parent_id',$parent_id)->select('comment_id')->get()->toArray();
+            foreach ($result as $key=>$value){
+                $con_sum++;
+                //评论加到同级别
+                $this->get_sum_children($value['comment_id'],$con_sum);
             }
         }
     }
