@@ -424,8 +424,9 @@ class CoursesController extends Controller{
                     ->orderBy('praise_count','desc')->skip(0)->take(5)->get()->toArray();
             foreach ($res as $key=>$value){
                 //查询评论的评论
-                $children = $this->get_children_comments($value['comment_id']);
-                $res[$key]['childrens'] = $children;
+                $list[$key]['childrens']=[];
+                $this->get_children_comments($value['comment_id'],$res[$key]['childrens'] );
+//                $res[$key]['childrens'] = $children;
                 $res[$key]['is_praise'] = 0;//未点赞
                 $res[$key]['mdate'] = $this->mdate($value['created_at']);
                 //当前登录用户是否已经点过赞
@@ -509,7 +510,10 @@ class CoursesController extends Controller{
                 //获取用户头像
 //                $list[$key]['from_user_face'] = $this->get_user_face($value['from_user']);
                 //此条评论的评论
-                $list[$key]['childrens']  = $this->get_children_comments($value['comment_id']);
+//                $list[$key]['childrens']  = $this->get_children_comments($value['comment_id']);
+
+                $list[$key]['childrens']=[];
+                $this->get_children_comments($value['comment_id'],$list[$key]['childrens']);
             }
             $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total);
         }else{
@@ -552,7 +556,9 @@ class CoursesController extends Controller{
                 //获取用户头像
 //                $list[$key]['from_user_face'] = $this->get_user_face($value['from_user']);
                 //此条评论的评论
-                $list[$key]['childrens']  = $this->get_children_comments($value['comment_id']);
+                $list[$key]['childrens']=[];
+                $this->get_children_comments($value['comment_id'],$list[$key]['childrens'] );
+
             }
             $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total);
         }else{
@@ -830,17 +836,18 @@ class CoursesController extends Controller{
         return response()->json($code);
     }
 
-    private function get_children_comments($parent_id){
-        $result = array();
+    private function get_children_comments($parent_id,&$childrens){
         if($parent_id){
             $result = Comments::where('parent_id',$parent_id)
                 ->select('courses_comments.comment_id','courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at','courses_comments.praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')->get()->toArray();
             foreach ($result as $key=>$value){
                 $result[$key]['mdate'] = $this->mdate($value['created_at']);
+                $childrens[] = $value;
+                //评论加到同级别
+                $this->get_children_comments($value['comment_id'],$childrens);
             }
         }
-        return $result;
     }
 
     /***
