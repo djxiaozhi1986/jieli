@@ -842,7 +842,7 @@ class CoursesController extends Controller{
                 ->select('courses_comments.comment_id','courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at','courses_comments.praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')->get()->toArray();
             foreach ($result as $key=>$value){
-                $result[$key]['mdate'] = $this->mdate($value['created_at']);
+                $value['mdate'] = $this->mdate($value['created_at']);
                 $childrens[] = $value;
                 //评论加到同级别
                 $this->get_children_comments($value['comment_id'],$childrens);
