@@ -424,7 +424,7 @@ class CoursesController extends Controller{
                     ->orderBy('praise_count','desc')->skip(0)->take(5)->get()->toArray();
             foreach ($res as $key=>$value){
                 //查询评论的评论
-                $list[$key]['childrens']=[];
+                $res[$key]['childrens']=[];
                 $this->get_children_comments($value['comment_id'],$res[$key]['childrens']);
 //                $res[$key]['childrens'] = $children;
                 $res[$key]['is_praise'] = 0;//未点赞
