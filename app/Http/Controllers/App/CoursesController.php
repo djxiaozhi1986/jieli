@@ -421,7 +421,7 @@ class CoursesController extends Controller{
             $res = Comments::where('course_id',$request->input('course_id'))
                     ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                     ->leftJoin('user','user.user_id','courses_comments.from_user')
-                    ->orderBy('praise_count','desc')->skip(0)->take(5)->get()->toArray();
+                    ->orderBy('praise_count','desc')->skip(0)->take(2)->get()->toArray();
             foreach ($res as $key=>$value){
                 //查询评论的评论
                 $res[$key]['childrens']=[];
