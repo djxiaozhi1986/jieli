@@ -13,6 +13,7 @@ use App\Modules\Courses;
 use App\Modules\Users;
 use Illuminate\Http\Request;
 use Cache;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller{
     /***
@@ -472,12 +473,15 @@ class UserController extends Controller{
      */
     public function get_lecturer_detail(Request $request){
         if($request->input('user_id')){
-            $lecturer =Users::where('user_type',2)->where('user_id',$request->input('user_id'))->select('user_id','nick_name','user_title','real_name','user_level','user_face','phone','intro','award')->first();
+            $lecturer =Users::where('user_type',2)->where('user_id',$request->input('user_id'))
+                ->select('user_id','nick_name','user_title','real_name','user_level',
+                    DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as user_face'),'phone','intro','award')->first();
 //            $lecturer = Users::where('user_id',$request->input('user_id'))->first();
             if($lecturer){
                 //获取主讲课程
                 $lecturer['courses'] =Courses::where('lecturer_id',$request->input('user_id'))
-                    ->select('course_id','title','description','coin_price','now_price','cover','is_home','is_live','opened_at','closed_at','created_at','is_oa')
+                    ->select('course_id','title','description','coin_price','now_price',
+                        DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_home','is_live','opened_at','closed_at','created_at','is_oa')
                     ->skip(0)->take(3)->get()->toArray();
                 //相关问答？？？？
                 $code = array('dec' => $this->success, 'data' => $lecturer);
