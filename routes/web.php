@@ -97,6 +97,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/classify/all','UserController@api_classify_all');
     $router->get('/classify/user','UserController@api_classify_user');
     $router->get('/classify/secondary','UserController@api_classify_secondary');
+    $router->get('/classify/user/secondary','UserController@api_user_class');
 
     $router->get('/expert/class','UserController@api_expert_class');
     $router->get('/expert/list','UserController@api_expert_list');
