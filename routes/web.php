@@ -165,6 +165,7 @@ $router->group(['namespace' => 'Admin'], function($router) {
     $router->get('/admin/courses/list','CoursesController@get_courses_list');
     //课程明细
     $router->get('/admin/courses/detail','CoursesController@get_course_detail');
+    $router->get('/admin/courses/detail1','CoursesController@get_course_detail1');
     $router->delete('/admin/courses/del','CoursesController@del_course');
     //讲师列表 *************
     $router->get('/admin/lecturer/list','CoursesController@get_lecturer_list');
