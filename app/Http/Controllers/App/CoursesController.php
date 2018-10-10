@@ -1002,11 +1002,11 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'))->where('courses.is_good',1)
+            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'))->where('courses.is_good',1)->where('courses.is_publish',1)
                 ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id');
             $total = $sql->count();
             $result = $sql->orderBy('courses_users_relaction.created_at','desc')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa','courses.coin_price','courses.now_price')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa','courses.coin_price','courses.now_price','courses.is_publish')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($result as $key=>$value){
                 //计算课程状态
@@ -1041,7 +1041,7 @@ class CoursesController extends Controller{
     public function get_good_courses(Request $request){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Courses::where('status',1)->where('is_good',1);
+            $sql = Courses::where('status',1)->where('is_good',1)->where('is_publish',1);
             $total = $sql->count();
             $result = $sql->orderBy('opened_at','desc')->orderBy('created_at','desc')
                 ->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'opened_at','closed_at','created_at','is_oa','coin_price','now_price')
