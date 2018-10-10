@@ -119,7 +119,7 @@ class CoursesController extends Controller{
         $login_user = $request->input('login_user');//讲师id
         if($login_user){
             //初始化sql
-            $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish','=',1)->where('lecturer_id',$login_user)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish',1)->where('lecturer_id',$login_user)->orderBy('opened_at','desc')->orderBy('created_at','desc');
             $total = $sql->count();
             $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
@@ -154,7 +154,7 @@ class CoursesController extends Controller{
         $login_user = $request->input('login_user');//讲师id
         if($login_user){
             //初始化sql
-            $sql = Orders::where('courses_orders.user_id',$login_user)->where('courses_orders.order_status',1)->orderBy('courses_orders.completed_at','desc')
+            $sql = Orders::where('courses_orders.user_id',$login_user)->where('courses.is_publish',1)->where('courses_orders.order_status',1)->orderBy('courses_orders.completed_at','desc')
                     ->leftJoin('courses','courses.course_id','courses_orders.course_id');
             $total = $sql->count();
             $list = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.is_live','courses.is_oa','courses.coin_price','courses.now_price','courses.audio_url','courses.opened_at','courses.closed_at','courses.created_at')
@@ -188,7 +188,7 @@ class CoursesController extends Controller{
         $page_index = $request->input('page_index')??1;//页码
         $page_number = $request->input('page_number')??10;//每页显示
         //初始化sql
-        $sql = Courses::where('status',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+        $sql = Courses::where('status',1)->where('is_publish',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
         //附加条件,模糊查询 课程标题、讲师姓名或昵称
         if($request->input('keyword')){
             $key = $request->input('keyword');
@@ -276,10 +276,15 @@ class CoursesController extends Controller{
                     //收藏总数
                     $result['fav_count'] = Favorites::where('course_id',$course->course_id)->count();
                     //判断是否为线下课程
-                    $result['is_online'] = 1;//线上
-                    $sec_count = Sections::where('course_id',$course->course_id)->count();
-                    if($sec_count>0){
-                        $result['is_online'] = 0;//线下
+//                    $result['is_online'] = 1;//线上
+//                    $sec_count = Sections::where('course_id',$course->course_id)->count();
+//                    if($sec_count>0){
+//                        $result['is_online'] = 0;//线下
+//                    }
+                    if($course->is_live==1){
+                        $result['is_online']=1;
+                    }else{
+                        $result['is_online']=0;
                     }
                     //计算课程状态
                     $now = time();
@@ -397,7 +402,7 @@ class CoursesController extends Controller{
                     $course_ids[] = $c['course_id'];
                 }
             }
-            $result = Courses::whereIn('course_id',$course_ids)->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $result = Courses::whereIn('course_id',$course_ids)->where('is_publish',1)->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->get()->toArray();
             $code = array('dec'=>$this->success,'data'=>$result);
         }
