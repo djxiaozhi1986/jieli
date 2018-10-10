@@ -134,6 +134,19 @@ class CoursesController extends Controller{
                         $list[$key]['is_praise'] = 1;//已经点赞
                     }
                 }
+
+                //计算课程状态
+                $now = time();
+                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                    //课程正在直播
+                    $list[$key]['status']=1;
+                }else if($now<$value['opened_at']){
+                    //未开始
+                    $list[$key]['status']=0;
+                }else if($now>$value['closed_at']){
+                    //已经结束
+                    $list[$key]['status']=2;
+                }
             }
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
@@ -169,6 +182,18 @@ class CoursesController extends Controller{
                     if($exits){
                         $list[$key]['is_praise'] = 1;//已经点赞
                     }
+                }
+                //计算课程状态
+                $now = time();
+                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                    //课程正在直播
+                    $list[$key]['status']=1;
+                }else if($now<$value['opened_at']){
+                    //未开始
+                    $list[$key]['status']=0;
+                }else if($now>$value['closed_at']){
+                    //已经结束
+                    $list[$key]['status']=2;
                 }
             }
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
