@@ -793,7 +793,7 @@ class CoursesController extends Controller{
                     ->leftJoin('courses','courses.course_id','courses_favorites.course_id');
 
             $total = $sql->count();
-            $result = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.coin_price','courses.now_price','courses.created_at','courses.opened_at','courses.closed_at','courses.is_oa')
+            $result = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.coin_price','courses.is_live','courses.now_price','courses.created_at','courses.opened_at','courses.closed_at','courses.is_oa')
                     ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($result as $key=>$value){
                 //计算课程状态
