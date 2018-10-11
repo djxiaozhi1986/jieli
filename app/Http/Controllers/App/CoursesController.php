@@ -57,6 +57,11 @@ class CoursesController extends Controller{
                         $list[$key]['is_praise'] = 1;//已经点赞
                     }
                 }
+                if($value['is_live']==1){
+                    $list[$key]['is_online']=1;
+                }else{
+                    $list[$key]['is_online']=0;
+                }
             }
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
@@ -100,6 +105,11 @@ class CoursesController extends Controller{
                 if($exits){
                     $list[$key]['is_praise'] = 1;//已经点赞
                 }
+            }
+            if($value['is_live']==1){
+                $list[$key]['is_online']=1;
+            }else{
+                $list[$key]['is_online']=0;
             }
         }
         $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
@@ -146,6 +156,12 @@ class CoursesController extends Controller{
                 }else if($now>$value['closed_at']){
                     //已经结束
                     $list[$key]['status']=2;
+                }
+
+                if($value['is_live']==1){
+                    $list[$key]['is_online']=1;
+                }else{
+                    $list[$key]['is_online']=0;
                 }
             }
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
@@ -195,6 +211,11 @@ class CoursesController extends Controller{
                     //已经结束
                     $list[$key]['status']=2;
                 }
+                if($value['is_live']==1){
+                    $list[$key]['is_online']=1;
+                }else{
+                    $list[$key]['is_online']=0;
+                }
             }
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
@@ -235,6 +256,11 @@ class CoursesController extends Controller{
                 if($exits) {
                     $list[$key]['is_praise'] = 1;//已经点赞
                 }
+            }
+            if($value['is_live']==1){
+                $list[$key]['is_online']=1;
+            }else{
+                $list[$key]['is_online']=0;
             }
         }
         $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
@@ -785,6 +811,11 @@ class CoursesController extends Controller{
                     //未知
                     $result[$key]['status']=-1;
                 }
+                if($value['is_live']==1){
+                    $result[$key]['is_online']=1;
+                }else{
+                    $result[$key]['is_online']=0;
+                }
             }
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
         }else{
@@ -942,6 +973,11 @@ class CoursesController extends Controller{
                     //未知
                     $result[$key]['status']=-1;
                 }
+                if($value['is_live']==1){
+                    $result[$key]['is_online']=1;
+                }else{
+                    $result[$key]['is_online']=0;
+                }
             }
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
             return response()->json($code);
@@ -983,6 +1019,7 @@ class CoursesController extends Controller{
                     //未知
                     $result[$key]['status']=-1;
                 }
+                $result[$key]['is_online']=1;
             }
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
             return response()->json($code);
@@ -1024,6 +1061,7 @@ class CoursesController extends Controller{
                     //未知
                     $result[$key]['status']=-1;
                 }
+                $result[$key]['is_online']=0;
             }
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
         }else{
@@ -1062,6 +1100,7 @@ class CoursesController extends Controller{
                     //未知
                     $result[$key]['status']=-1;
                 }
+                $result[$key]['is_online']=0;
             }
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
         $json_str = json_encode($code);
