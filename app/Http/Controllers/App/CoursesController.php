@@ -33,8 +33,12 @@ class CoursesController extends Controller{
         $page_index = $request->input('page_index')??1;//页码
         $page_number = $request->input('page_number')??10;//每页显示
         if($request->input('c_id')){
-            //初始化sql
-            $sql = Courses::where('is_publish','=',1)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            if($request->input('c_id')==999){
+                $sql = Courses::where('is_publish','=',1)->where('is_home',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            }else{
+                //初始化sql
+                $sql = Courses::where('is_publish','=',1)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            }
             //附加条件,模糊查询 课程标题、讲师姓名或昵称
             if($request->input('keyword')){
                 $key = $request->input('keyword');
