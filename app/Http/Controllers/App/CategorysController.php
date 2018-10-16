@@ -82,11 +82,11 @@ class CategorysController extends Controller{
                         $query->where('is_default', 1)
                             ->where('status', 1)
                             ->where('parent_id',0);
-                    })->get()->toArray();
+                    })->orderBy('sort','asc')->get()->toArray();
 //                var_dump($data);die;
             }else{
                 //取默认分类
-                $data = Categorys::where('is_default',1)->where('status',1)->where('parent_id',0)->select('category_name as c_name','category_id as c_id')->get()->toArray();
+                $data = Categorys::where('is_default',1)->where('status',1)->where('parent_id',0)->select('category_name as c_name','category_id as c_id')->orderBy('sort','asc')->get()->toArray();
             }
             $result = [];
             foreach ($data as $key=>$value){
