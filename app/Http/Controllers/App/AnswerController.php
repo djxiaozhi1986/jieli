@@ -81,13 +81,24 @@ class AnswerController extends Controller{
         $qa_title = $request->input('qa_title');
         $exper_ids = $request->input('exper_ids');
         $imgs = $request->input('imgs');
-        if($user_id && isset($reward) && isset($jieli_coin) && $forum_ids && $content && $qa_title && $exper_ids){
+        if($user_id &&  $forum_ids && $content && $qa_title ){
             $request_path = '/answer/addAnswer';
             $request_url = config('C.API_URL').$request_path;
-            $params = ['user_id'=>$user_id,'reward'=>$reward,'jieli_coin'=>$jieli_coin,'forum_ids'=>$forum_ids,'content'=>$content,'qa_title'=>$qa_title,'exper_ids'=>$exper_ids];
+            $params = ['user_id'=>$user_id,'jieli_coin'=>$jieli_coin,'forum_ids'=>$forum_ids,'content'=>$content,'qa_title'=>$qa_title];
             if($imgs){
                 $params['imgs'] = $imgs;
             }
+            //isset($reward) && isset($jieli_coin) && $exper_ids
+            if(isset($reward)){
+                $params['reward'] = $reward;
+            }
+            if(isset($jieli_coin)){
+                $params['jieli_coin'] = $jieli_coin;
+            }
+            if(isset($exper_ids)){
+                $params['exper_ids'] = $exper_ids;
+            }
+
             $response = HttpClient::api_request($request_url,$params,'POST',true);
             $code = json_decode($response);
         }else{
