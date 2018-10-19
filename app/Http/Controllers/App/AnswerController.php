@@ -276,4 +276,23 @@ class AnswerController extends Controller{
         $code = json_decode($response);
         return response()->json($code);
     }
+    public function api_answer_by_course(Request $request){
+        $user_id = $request->input('login_user');
+        $page_index = $request->input('page_index')??1;
+        $order = $request->input('order');
+        $courses_id = $request->input('courses_id');
+        if($user_id && $page_index && $courses_id){
+            $request_path = '/answer/getCoursesList';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id,'page_index'=>$page_index,'courses_id'=>$courses_id];
+            if($order){
+                $params['order'] = $order;
+            }
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
 }

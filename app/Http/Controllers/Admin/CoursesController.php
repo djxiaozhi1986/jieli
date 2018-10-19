@@ -873,4 +873,36 @@ class CoursesController extends Controller{
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
     }
+    public function get_check_course_comments(Request $request){
+        if($request->input('course_id')){
+            //查询只针对课程的评价
+            $page_index = $request->input('page_index')??1;//页码
+            $page_number = $request->input('page_number')??5;
+            $sql = Comments::where('course_id',$request->input('course_id'))->whereNull('parent_id');
+            $total = $sql->count();
+            $list =$sql->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+            //查询列表的回复列表
+            foreach($list as $key=>$value){
+                //此评论的点赞数量
+                $list[$key]['praise_num'] = Praises::where('comment_id',$value['comment_id'])->count();
+                //当前登录用户是否已经点过赞
+                if($request->input('login_user')){
+                    $exits = Praises::where('from_user',$request->input('login_user'))->where('comment_id',$value['comment_id'])->exists();
+                    if($exits){
+                        $list[$key]['is_praise'] = 1;//已经点赞
+                    }else{
+                        $list[$key]['is_praise'] = 0;//未点赞
+                    }
+                }
+                //此条评论的评论
+                $list[$key]['childrens']  = $this->get_children_comments($value['comment_id']);
+            }
+            $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
 }

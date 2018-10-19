@@ -155,6 +155,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/answer/user/attention','AnswerController@api_answer_user_attention');
     $router->get('/answer/user','AnswerController@api_answer_user');
     $router->get('/answer/keys/hot','AnswerController@api_answer_hot_keys');
+    $router->get('/answer/course/list','AnswerController@api_answer_by_course');
 
 });
 $router->group(['namespace' => 'Admin'], function($router) {
