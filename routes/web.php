@@ -55,6 +55,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/courses/good','CoursesController@get_good_courses');
     $router->get('/courses/lecturer','CoursesController@get_lecturer_courses_list');
     $router->get('/courses/user','CoursesController@get_user_courses_list');
+    $router->get('/courses/keys/hot','CoursesController@get_hot_keys');
 
 
     /*微课分类*/
@@ -109,6 +110,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/user/msg/list','UserController@api_sys_msg_list');
     $router->post('/user/msg/del','UserController@api_sys_msg_del');
     $router->get('/user/msg/detail','UserController@api_sys_msg_detail');
+    $router->get('/user/point/list','UserController@api_user_point_list');
 
 
     //购物车查询
@@ -152,6 +154,7 @@ $router->group(['namespace' => 'App'], function($router) {
     //new
     $router->get('/answer/user/attention','AnswerController@api_answer_user_attention');
     $router->get('/answer/user','AnswerController@api_answer_user');
+    $router->get('/answer/keys/hot','AnswerController@api_answer_hot_keys');
 
 });
 $router->group(['namespace' => 'Admin'], function($router) {

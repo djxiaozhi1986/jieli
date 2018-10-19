@@ -268,4 +268,12 @@ class AnswerController extends Controller{
         }
         return response()->json($code);
     }
+    public function api_answer_hot_keys(Request $request){
+        $request_path = '/answer/getHotKeyword';
+        $request_url = config('C.API_URL').$request_path;
+        $params = [];
+        $response = HttpClient::api_request($request_url,$params,'POST',true);
+        $code = json_decode($response);
+        return response()->json($code);
+    }
 }

@@ -47,7 +47,6 @@ class UserController extends Controller{
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
-        return response()->json($code);
     }
     /***
      * 修改昵称
@@ -502,6 +501,21 @@ class UserController extends Controller{
             $request_path = '/classify/getUserClass';
             $request_url = config('C.API_URL').$request_path;
             $params = ['user_id'=>$user_id];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+
+    public function api_user_point_list(Request $request){
+        $page_index = $request->input('page_index')??1;
+        $user_id = $request->input('login_user');
+        if($user_id){
+            $request_path = '/user/getPointlist';
+            $request_url = config('C.API_URL').$request_path;
+            $params = ['user_id'=>$user_id,'page_index'=>$page_index];
             $response = HttpClient::api_request($request_url,$params,'POST',true);
             $code = json_decode($response);
         }else{

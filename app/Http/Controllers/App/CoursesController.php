@@ -246,6 +246,18 @@ class CoursesController extends Controller{
                 $query->where('title','like','%'.$key.'%')
                     ->orWhere('lecturer_name','like','%'.$key.'%');
             });
+            //保存查询关键词
+            //查询关键词是否搜索过
+            $skey = DB::table('courses_search_keys')->where('keyword',$key)->first();
+            if($skey){
+                DB::table('courses_search_keys')->increment('count', 1, ['keyword' => $key]);
+//                $skey->count = $skey->count+1;
+//                $skey->save();
+            }else{
+                $skey['keyword'] = $key;
+                $skey['count'] = 1;
+                DB::table('courses_search_keys')->insert($skey);
+            }
         }
         $total = $sql->count();
         $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
@@ -748,12 +760,18 @@ class CoursesController extends Controller{
             $savedata['course_id'] = $request->input('course_id');
             $savedata['user_id'] = $request->input('login_user');
             $savedata['created_at'] = time();
-            $res = Favorites::create($savedata);
-            if($res){
-                $code= array('dec'=>$this->success);
+            //如果存在
+            $exitst = Favorites::where('user_id',$savedata['user_id'])->where('course_id',$savedata['course_id'])->exists();
+            if(!$exitst){$res = Favorites::create($savedata);
+                if($res){
+                    $code= array('dec'=>$this->success);
+                }else{
+                    $code= array('dec'=>$this->error);
+                }
             }else{
-                $code= array('dec'=>$this->error);
+                $code= array('dec'=>$this->success);
             }
+
         }else{
             $code = array('dec'=>$this->client_err);
         }
@@ -1173,4 +1191,11 @@ class CoursesController extends Controller{
         return response()->json($res_json);
     }
 
+    public function get_hot_keys(Request $request){
+        $res = DB::table('courses_search_keys')->select('keyword as keywords')->orderBy('count','desc')->skip(0)->take(10)->get();
+        $code = array('dec' => $this->success, 'data' => $res);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
 }
