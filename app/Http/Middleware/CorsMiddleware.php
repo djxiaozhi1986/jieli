@@ -28,7 +28,8 @@ class CorsMiddleware
 
         $this->allow_origin = [
             'http://localhost:8080',
-            'http://jladmin.kakusoft.com'
+            'http://jladmin.kakusoft.com',
+            'http://jielishe.tiennet.com'
         ];
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 //        var_dump($origin);die;
