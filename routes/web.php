@@ -188,6 +188,11 @@ $router->group(['namespace' => 'Admin'], function($router) {
     $router->get('/admin/category/manager','CategorysController@get_all_categorys');
     $router->post('/admin/category/save','CategorysController@saveCategory');
     $router->delete('/admin/category/del','CategorysController@delCategory');
+
+    $router->get('/admin/comment/stay','CoursesController@get_check_course_comments');
+    $router->get('/admin/comment/pass','CoursesController@get_pass_course_comments');
+    $router->get('/admin/comment/refuse','CoursesController@get_refuse_course_comments');
+    $router->post('/admin/comment/verify','CoursesController@comment_verify');
     //课程点赞记录
     //课程收藏记录
     //课程评论

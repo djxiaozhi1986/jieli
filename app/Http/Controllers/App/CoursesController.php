@@ -488,9 +488,9 @@ class CoursesController extends Controller{
      */
     public function get_hot_comments(Request $request){
         if($request->input('course_id')){
-            $total = Comments::where('course_id',$request->input('course_id'))->count();
+            $total = Comments::where('course_id',$request->input('course_id'))->where('is_verify',1)->count();
             $overplus = 0;
-            $res = Comments::where('course_id',$request->input('course_id'))
+            $res = Comments::where('course_id',$request->input('course_id'))->where('is_verify',1)
                     ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                     ->leftJoin('user','user.user_id','courses_comments.from_user')
                     ->orderBy('praise_count','desc')->skip(0)->take(2)->get()->toArray();
@@ -562,7 +562,7 @@ class CoursesController extends Controller{
             //查询只针对课程的评价
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??5;
-            $sql = Comments::where('course_id',$request->input('course_id'))->whereNull('parent_id');
+            $sql = Comments::where('course_id',$request->input('course_id'))->whereNull('parent_id')->where('is_verify',1);
             $total = $sql->count();
             $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')
@@ -608,7 +608,7 @@ class CoursesController extends Controller{
             //查询只针对课程的评价
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??5;
-            $sql = Comments::where('parent_id',$request->input('comment_id'));
+            $sql = Comments::where('parent_id',$request->input('comment_id'))->where('is_verify',1);
             $total = $sql->count();
             $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')
@@ -925,7 +925,7 @@ class CoursesController extends Controller{
 
     private function get_children_comments($parent_id,&$childrens){
         if($parent_id){
-            $result = Comments::where('parent_id',$parent_id)
+            $result = Comments::where('parent_id',$parent_id)->where('is_verify',1)
                 ->select('courses_comments.comment_id','courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at','courses_comments.praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')->get()->toArray();
             foreach ($result as $key=>$value){
@@ -937,7 +937,7 @@ class CoursesController extends Controller{
         }
     }
     private function get_comment_sum($id,&$con_sum,$type){
-        $sql = Comments::select('comment_id');
+        $sql = Comments::select('comment_id')->where('is_verify',1);
         if($type==1){
             //课程所有评论
             $sql = $sql->where('course_id',$id);
@@ -955,7 +955,7 @@ class CoursesController extends Controller{
     }
     private function get_sum_children($parent_id,&$con_sum){
         if($parent_id){
-            $result = Comments::where('parent_id',$parent_id)->select('comment_id')->get()->toArray();
+            $result = Comments::where('parent_id',$parent_id)->where('is_verify',1)->select('comment_id')->get()->toArray();
             foreach ($result as $key=>$value){
                 $con_sum++;
                 //评论加到同级别
