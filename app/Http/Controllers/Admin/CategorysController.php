@@ -191,7 +191,7 @@ class CategorysController extends Controller{
     }
     public function get_query_user(Request $request){
         if($request->input('key')){
-              $result = Users::where('real_name', 'like', '%'.$request->input('key').'%')->select('real_name','user_id')->where('is_deleted',0)->get()->toArray();
+              $result = Users::where('real_name', 'like', '%'.$request->input('key').'%')->select('real_name as label','user_id as value')->where('is_deleted',0)->get()->toArray();
         }else{
             $result = [];
         }
