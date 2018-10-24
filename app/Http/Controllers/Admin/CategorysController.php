@@ -8,6 +8,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\libraries\HttpClient;
 use App\Modules\Categorys;
 use App\Modules\Users;
 use Illuminate\Http\Request;
