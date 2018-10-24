@@ -193,6 +193,7 @@ $router->group(['namespace' => 'Admin'], function($router) {
     $router->get('/admin/comment/pass','CoursesController@get_pass_course_comments');
     $router->get('/admin/comment/refuse','CoursesController@get_refuse_course_comments');
     $router->post('/admin/comment/verify','CoursesController@comment_verify');
+    $router->get('/admin/users/query','CategorysController@get_query_user');
     //课程点赞记录
     //课程收藏记录
     //课程评论

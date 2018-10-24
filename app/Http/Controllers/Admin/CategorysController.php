@@ -9,6 +9,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Categorys;
+use App\Modules\Users;
 use Illuminate\Http\Request;
 
 class CategorysController extends Controller{
@@ -187,5 +188,14 @@ class CategorysController extends Controller{
             }
         }
         return $childre;
+    }
+    public function get_query_user(Request $request){
+        if($request->input('key')){
+              $result = Users::where('real_name', 'like', '%'.$request->input('key').'%')->select('real_name','user_id')->where('is_deleted',0)->get()->toArray();
+        }else{
+            $result = [];
+        }
+        $code = array('dec' => $this->success, 'data' => $result);
+        return response()->json($code);
     }
 }
