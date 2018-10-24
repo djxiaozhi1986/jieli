@@ -198,4 +198,28 @@ class CategorysController extends Controller{
         $code = array('dec' => $this->success, 'data' => $result);
         return response()->json($code);
     }
+
+    public function add_answer(Request $request){
+        $user_id = $request->input('user_id');
+        $forum_ids = $request->input('forum_ids');
+        $qa_title = $request->input('qa_title');
+        $content = $request->input('content');
+        $courses_id = $request->input('courses_id');
+        if($user_id && $forum_ids && $qa_title && $content && $courses_id){
+            $request_path = '/answer/addAnswer';
+            $request_url = config('C.API_URL').$request_path;
+            $params = [
+                'user_id'=>$user_id,
+                'forum_ids'=>$forum_ids,
+                'qa_title'=>$qa_title,
+                'content'=>$content,
+                'courses_id'=>$courses_id
+            ];
+            $response = HttpClient::api_request($request_url,$params,'POST',true);
+            $code = json_decode($response);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
 }
