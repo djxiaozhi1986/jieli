@@ -114,7 +114,7 @@ class CoursesController extends Controller{
             }
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','is_live','is_good','coin_price','now_price','audio_url','opened_at','closed_at','created_at','is_publish')
+        $list = $sql->select('course_id','title','description','lecturer_name','cover','is_live','is_good','coin_price','now_price','audio_url','opened_at','closed_at','created_at','is_publish','im_group_id')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
         foreach ($list as $key=>$value){
             //计算课程状态
@@ -623,7 +623,13 @@ class CoursesController extends Controller{
             }else{
                 //添加
                 $save_data['created_at'] = $save_data['updated_at'] = time();
-                $res = Courses::create($save_data);
+                $res = Courses::insertGetId($save_data);
+                if($res){
+                    //创建微课群组
+                    $channel = $this->create_im_group($request->input('title'),$request->input('lecturer_id'),$request->input('lecturer_name'));
+                    $up_data['im_group_id'] = $channel->channel_id;
+                    Courses::where('course_id',$res)->update($up_data);
+                }
             }
             if($res){
                 $code = array('dec' => $this->success);
@@ -636,6 +642,46 @@ class CoursesController extends Controller{
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
+    }
+
+    public function create_im_group_by_course_id(Request $request){
+        if($request->input('course_id')){
+            $course = Courses::where('course_id',$request->input('course_id'))->select('title','lecturer_id','lecturer_name','im_group_id')->first();
+            if($course){
+                if($course->im_group_id){
+                    $code = array('dec'=> array('code' => '060112', 'msg' => '该微课已经创建过问答群组'));
+                }else {
+                    $channel = $this->create_im_group($course->title,$course->lecturer_id,$course->lecturer_name);
+                    if($channel){
+                        $up_data['im_group_id'] = $channel->channel_id;
+                        $res = Courses::where('course_id',$request->input('course_id'))->update($up_data);
+                        if($res){
+                            $code = array('dec'=>$this->success);
+                        }else{
+                            $code = array('dec'=>$this->error);
+                        }
+                    }else{
+                        $code = array('dec'=> array('code' => '060111', 'msg' => '问答群组创建失败'));
+                    }
+                }
+            }else{
+                $code = array('dec'=>$this->course_nothing_err);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        return response()->json($code);
+    }
+    public function create_im_group($group_name,$expert_id,$expert_name){
+        $request_path = '/app/createChannel';
+        $request_url = config('C.API_URL') . $request_path;
+        $response = HttpClient::api_request($request_url, ['name'=>$group_name,'purpose'=>'微课《'.$group_name.'》实时问答','members'=>['id'=>$expert_id,'nickname'=>$expert_name,'index'=>0]], 'POST', true);
+        $res = json_decode($response);
+        $channel = null;
+        if($res->dec->code=='000000'){
+            $channel = $res->data;
+        }
+        return $channel;
     }
 
     /**
