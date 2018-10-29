@@ -627,7 +627,7 @@ class CoursesController extends Controller{
                 if($res){
                     //创建微课群组
                     $channel = $this->create_im_group($request->input('title'),$request->input('lecturer_id'),$request->input('lecturer_name'));
-                    $up_data['im_group_id'] = $channel->channel_id;
+                    $up_data['im_group_id'] = $channel->channelId;
                     Courses::where('course_id',$res)->update($up_data);
                 }
             }
@@ -653,7 +653,7 @@ class CoursesController extends Controller{
                 }else {
                     $channel = $this->create_im_group($course->title,$course->lecturer_id,$course->lecturer_name);
                     if($channel){
-                        $up_data['im_group_id'] = $channel->channel_id;
+                        $up_data['im_group_id'] = $channel->channelId;
                         $res = Courses::where('course_id',$request->input('course_id'))->update($up_data);
                         if($res){
                             $code = array('dec'=>$this->success);
