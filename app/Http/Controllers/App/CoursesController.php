@@ -248,11 +248,9 @@ class CoursesController extends Controller{
             });
             //保存查询关键词
             //查询关键词是否搜索过
-            $skey = DB::table('courses_search_keys')->where('keyword',$key)->first();
-            if($skey){
+            $exists = DB::table('courses_search_keys')->where('keyword',$key)->exists();
+            if($exists){
                 DB::table('courses_search_keys')->increment('count', 1, ['keyword' => $key]);
-//                $skey->count = $skey->count+1;
-//                $skey->save();
             }else{
                 $skey['keyword'] = $key;
                 $skey['count'] = 1;
