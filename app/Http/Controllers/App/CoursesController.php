@@ -241,7 +241,7 @@ class CoursesController extends Controller{
         $sql = Courses::where('status',1)->where('is_publish',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
         //附加条件,模糊查询 课程标题、讲师姓名或昵称
         if($request->input('keyword')){
-            $key = $request->input('keyword');
+            $key = trim($request->input('keyword')," ");
             $sql = $sql->where(function ($query) use($key){
                 $query->where('title','like','%'.$key.'%')
                     ->orWhere('lecturer_name','like','%'.$key.'%');
