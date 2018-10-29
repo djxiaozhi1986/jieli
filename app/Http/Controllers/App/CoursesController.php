@@ -48,7 +48,7 @@ class CoursesController extends Controller{
                 });
             }
             $total = $sql->count();
-            $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover) as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover) as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($list as $key=>$value){
                 //此微课的点赞数量
@@ -95,7 +95,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
 
 //        array_walk_recursive($list, $this->convertNull());
@@ -135,7 +135,7 @@ class CoursesController extends Controller{
             //初始化sql
             $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish',1)->where('lecturer_id',$login_user)->orderBy('opened_at','desc')->orderBy('created_at','desc');
             $total = $sql->count();
-            $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($list as $key=>$value){
                 //此微课的点赞数量
@@ -190,7 +190,7 @@ class CoursesController extends Controller{
             $sql = Orders::where('courses_orders.user_id',$login_user)->where('courses.is_publish',1)->where('courses_orders.order_status',1)->orderBy('courses_orders.completed_at','desc')
                     ->leftJoin('courses','courses.course_id','courses_orders.course_id');
             $total = $sql->count();
-            $list = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.is_live','courses.is_oa','courses.coin_price','courses.now_price','courses.audio_url','courses.opened_at','courses.closed_at','courses.created_at')
+            $list = $sql->select('courses.course_id','courses.title',DB::raw('strip_tags(jl_courses.description) as description'),'courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.is_live','courses.is_oa','courses.coin_price','courses.now_price','courses.audio_url','courses.opened_at','courses.closed_at','courses.created_at')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($list as $key=>$value){
                 //此微课的点赞数量
@@ -260,7 +260,7 @@ class CoursesController extends Controller{
             }
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
         foreach ($list as $key=>$value){
             //此微课的点赞数量
@@ -469,7 +469,7 @@ class CoursesController extends Controller{
                     $course_ids[] = $c['course_id'];
                 }
             }
-            $result = Courses::whereIn('course_id',$course_ids)->where('is_publish',1)->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $result = Courses::whereIn('course_id',$course_ids)->where('is_publish',1)->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->get()->toArray();
             $code = array('dec'=>$this->success,'data'=>$result);
         }
