@@ -174,30 +174,7 @@ class LoginController extends Controller{
                 Cache::pull($u_phone);
                 $user = Users::where('user_name', $u_phone)->first();
                 //获取用户详情
-                if($user) {
-                    //登录成功，获取token
-                    $u_token_info = Users_tokens::where('user_id', $user->user_id)->first();
-                    if ($u_token_info) {
-                        //验证是否过期
-                        if (time() > $u_token_info->user_token_expire) {
-                            $u_token_info->user_token = $this->create_token();
-                            $u_token_info->user_token_expire = time() + (7 * 24 * 3600);
-                            $u_token_info->save();
-                        }
-                        $user->u_token = $u_token_info->user_token;
-                        $user->u_token_expire = $u_token_info->user_token_expire;
-                    } else {
-                        //生成新的token
-                        $save_token['user_token'] = $this->create_token();
-                        $save_token['user_token_expire'] = time() + (7 * 24 * 3600);
-                        $save_token['user_id'] = $user->user_id;
-                        $row = Users_tokens::create($save_token);
-                        if ($row) {
-                            $user->u_token = $save_token['user_token'];
-                            $user->u_token_expire = $save_token['user_token_expire'];
-                        }
-                    }
-                }else{
+                if(!$user) {
                     $reg["user_name"] = $u_phone;
                     $reg["phone"] = $u_phone;
                     $reg["add_time"] = time();
@@ -208,10 +185,20 @@ class LoginController extends Controller{
                     $save_token['user_token_expire'] = time() + (7 * 24 * 3600);
                     $save_token['user_id'] = $id;
                     Users_tokens::create($save_token);
-
                     $user = Users::where('user_id', $id)->first();
-
                 }
+                //登录成功，获取token
+                $request_path = '/user/auth';
+                $request_url = config('C.API_URL').$request_path;
+                $params = ['userId'=>$user->user_id];
+                if($user->nickname){
+                    $params['nickname'] = $user->nick_name;
+                }else{
+                    $params['nickname'] = $user->user_name;
+                }
+                $response = HttpClient::api_request($request_url,$params,'POST',true);
+                $res = json_decode($response);
+                $user->u_token = $res->data->u_token;
                 $user->user_pass = null;
                 $u = json_decode(json_encode($user),TRUE);
                 $code = array('dec'=>$this->success,'data'=>$u);
@@ -292,33 +279,11 @@ class LoginController extends Controller{
             $response = HttpClient::api_request($request_url,$params,'POST',true);
             $user = null;
             $res = json_decode($response);
-//            var_dump($res->dec->code);die;
             if($res->dec->code=='000000'){
                 $user = $res->data;
                 if($user){
 //                    var_dump($user->user_id);die;
                     //登录成功，获取token
-                    $u_token_info = Users_tokens::where('user_id',$user->user_id)->first();
-                    if($u_token_info){
-                        //验证是否过期
-                        if(time()>$u_token_info->user_token_expire){
-                            $u_token_info->user_token = $this->create_token();
-                            $u_token_info->user_token_expire = time() + (7 * 24 * 3600);
-                            $u_token_info->save();
-                        }
-                        $user->u_token = $u_token_info->user_token;
-                        $user->u_token_expire = $u_token_info->user_token_expire;
-                    }else{
-                        //生成新的token
-                        $save_token['user_token'] = $this->create_token();
-                        $save_token['user_token_expire'] = time() + (7 * 24 * 3600);
-                        $save_token['user_id'] = $user->user_id;
-                        $row = Users_tokens::create($save_token);
-                        if($row){
-                            $user->u_token = $save_token['user_token'];
-                            $user->u_token_expire = $save_token['user_token_expire'];
-                        }
-                    }
                     $u = json_decode(json_encode($user),TRUE);
                     $code = array('dec'=>$this->success,'data'=>$u);
                 }else{
