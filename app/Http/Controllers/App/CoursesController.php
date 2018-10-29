@@ -309,6 +309,7 @@ class CoursesController extends Controller{
                     $result['lecturer_name']=$course->lecturer_name;
                     $result['coin_price']=$course->coin_price;
                     $result['now_price']=$course->now_price;
+                    $result['im_group_id']=$course->im_group_id;
                     if($course->cover){
                         $result['cover']=config('C.DOMAIN').$course->cover;
                     }
