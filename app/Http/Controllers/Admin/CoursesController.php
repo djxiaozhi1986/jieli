@@ -675,7 +675,12 @@ class CoursesController extends Controller{
     public function create_im_group($group_name,$expert_id,$expert_name){
         $request_path = '/app/createChannel';
         $request_url = config('C.API_URL') . $request_path;
-        $response = HttpClient::api_request($request_url, ['name'=>$group_name,'purpose'=>'微课《'.$group_name.'》实时问答','members'=>['id'=>$expert_id,'nickname'=>$expert_name,'index'=>0]], 'POST', true);
+        $members = array();
+        $item['id'] = $expert_id;
+        $item['nickname'] = $expert_name;
+        $item['index'] = 0;
+        $members[] = $item;
+        $response = HttpClient::api_request($request_url, ['name'=>$group_name,'purpose'=>'微课《'.$group_name.'》实时问答','members'=>$members], 'POST', true);
         $res = json_decode($response);
         $channel = null;
         if($res->dec->code=='000000'){
