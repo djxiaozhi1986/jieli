@@ -270,9 +270,14 @@ class UserController extends Controller{
         }
     }
     public function api_classify_all(Request $request){
+        $user_id = $request->input('login_user');
         $request_path = '/classify/allList';
         $request_url = config('C.API_URL').$request_path;
-        $response = HttpClient::api_request($request_url,[],'POST',true);
+        $params = [];
+        if($user_id){
+            $params['user_id'] = $user_id;
+        }
+        $response = HttpClient::api_request($request_url,$params,'POST',true);
         $code = json_decode($response);
         return response()->json($code);
     }
