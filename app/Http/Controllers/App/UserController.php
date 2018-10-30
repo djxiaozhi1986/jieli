@@ -275,7 +275,7 @@ class UserController extends Controller{
         $request_url = config('C.API_URL').$request_path;
         $params = [];
         if($user_id){
-            $params['user_id'] = $user_id;
+            $params = ['user_id'=> $user_id];
         }
         $response = HttpClient::api_request($request_url,$params,'POST',true);
         $code = json_decode($response);
