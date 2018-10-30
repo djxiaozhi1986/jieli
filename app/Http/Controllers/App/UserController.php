@@ -273,9 +273,10 @@ class UserController extends Controller{
         $user_id = $request->input('login_user');
         $request_path = '/classify/allList';
         $request_url = config('C.API_URL').$request_path;
-        $params = [];
         if($user_id){
             $params = ['user_id'=> $user_id];
+        }else{
+            $params = ['user_id'=> null];
         }
         $response = HttpClient::api_request($request_url,$params,'POST',true);
         $code = json_decode($response);
