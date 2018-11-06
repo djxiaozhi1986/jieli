@@ -177,6 +177,7 @@ class LoginController extends Controller{
                 if(!$user) {
                     $reg["user_name"] = $u_phone;
                     $reg["phone"] = $u_phone;
+                    $reg["nick_name"] = $u_phone;
                     $reg["add_time"] = time();
                     $reg["login_time"] = time();
                     $id = Users::insertGetId($reg);
