@@ -180,11 +180,6 @@ class LoginController extends Controller{
                     $reg["add_time"] = time();
                     $reg["login_time"] = time();
                     $id = Users::insertGetId($reg);
-                    //生成新的token
-                    $save_token['user_token'] = $this->create_token();
-                    $save_token['user_token_expire'] = time() + (7 * 24 * 3600);
-                    $save_token['user_id'] = $id;
-                    Users_tokens::create($save_token);
                     $user = Users::where('user_id', $id)->first();
                 }
                 //登录成功，获取token
@@ -198,8 +193,11 @@ class LoginController extends Controller{
                 }
                 $response = HttpClient::api_request($request_url,$params,'POST',true);
                 $res = json_decode($response);
+
+                $this->set_user_app_sms($user->user_id,$user->user_name,$user->user_face,$user->nick_name);
                 $user->u_token = $res->data->u_token;
                 $user->user_pass = null;
+
                 $u = json_decode(json_encode($user),TRUE);
                 $code = array('dec'=>$this->success,'data'=>$u);
                 $json_str = json_encode($code);
@@ -213,6 +211,12 @@ class LoginController extends Controller{
         }
     }
 
+    public function set_user_app_sms($user_id,$user_name,$user_face,$nick_name){
+        $request_path = '/user/appsms';
+        $request_url = config('C.API_URL').$request_path;
+        $params = ['user_id'=>$user_id,'user_name'=>$user_name,'user_face'=>$user_face,'nick_name'=>$nick_name];
+        HttpClient::api_request($request_url,$params,'POST',true);
+    }
 
     /**
      * 第三方登录绑定手机号
