@@ -284,6 +284,40 @@ class CoursesController extends Controller{
     }
 
     /***
+     * 分类相关课程列表
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function classify_course_list(Request $request){
+        $page_index = $request->input('page_index')??1;//页码
+        $page_number = $request->input('page_number')??3;//每页显示
+        $course_id = $request->input('course_id');
+        if($course_id){
+            //查询课程分类
+            $list = Courses::whereRaw("c_id  = (select c_id from jl_courses where course_id=".$course_id.")")
+                ->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+                ->orderBy('created_at','desc')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+            foreach ($list as $key=>$value){
+                //此微课的点赞数量
+                $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
+                $list[$key]['is_praise'] = 0;//未点赞
+//                if($value['is_live']==1){
+//                    $list[$key]['is_online']=1;
+//                }else{
+//                    $list[$key]['is_online']=0;
+//                }
+            }
+            $code = array('dec'=>$this->success,'data'=>$list);
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
+    /***
      * 获取课程详情
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response

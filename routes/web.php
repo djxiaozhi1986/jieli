@@ -14,7 +14,7 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
-
+$router->get('/domain/check','ExampleController@check_domain');
 $router->post('/upload_pic','ExampleController@editor_upload_pic');
 $router->group(['namespace' => 'App'], function($router) {
     //公共类
@@ -50,7 +50,8 @@ $router->group(['namespace' => 'App'], function($router) {
     //足迹停留，离开微课详情页使用 *************
     $router->post('/courses/footstay','CoursesController@foot_stay');
     //同类购买-new
-    $router->get('/courses/similar','CoursesController@similar_course_list');
+    $router->get('/courses/buy/similar','CoursesController@similar_course_list');
+    $router->get('/courses/similar','CoursesController@classify_course_list');
     $router->get('/courses/comments/hot','CoursesController@get_hot_comments');
     $router->get('/courses/good','CoursesController@get_good_courses');
     $router->get('/courses/lecturer','CoursesController@get_lecturer_courses_list');
