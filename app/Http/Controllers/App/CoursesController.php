@@ -294,7 +294,7 @@ class CoursesController extends Controller{
         $course_id = $request->input('course_id');
         if($course_id){
             //查询课程分类
-            $list = Courses::whereRaw("c_id  = (select c_id from jl_courses where course_id=".$course_id.")")
+            $list = Courses::whereRaw("c_id  = (select c_id from jl_courses where course_id=".$course_id.") and course_id <> ".$course_id)
                 ->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->orderBy('created_at','desc')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
