@@ -890,6 +890,23 @@ class CoursesController extends Controller{
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
     }
+    public function down(Request $request){
+        $course_id = $request->input('course_id');
+        if($course_id){
+            $data['is_publish'] = 0;
+            $res = Courses::where('course_id',$course_id)->update($data);
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec'=>$this->error);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
     public function get_check_course_comments(Request $request){
         if($request->input('course_id')){
             //查询只针对课程的评价
