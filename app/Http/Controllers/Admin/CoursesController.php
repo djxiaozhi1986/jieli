@@ -198,6 +198,7 @@ class CoursesController extends Controller{
                 $result['is_oa']=$course->is_oa;//是否开源
                 $result['is_good']=$course->is_good;
                 $result['is_try']= $course->is_try;
+                $result['view_level']= $course->view_level;
                 $result['c_ids'][] = $course->c_id;
 
                 $code = array('dec'=>$this->success,'data'=>$result);
@@ -615,6 +616,7 @@ class CoursesController extends Controller{
             $save_data['is_oa'] = $request->input('is_oa');
             $save_data['is_live'] = $request->input('is_live');
             $save_data['is_try'] = $request->input('is_try');
+            $save_data['view_level'] = $request->input('view_level');
 
             $res = false;
             if($request->input('course_id')){

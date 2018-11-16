@@ -351,6 +351,7 @@ class CoursesController extends Controller{
                     $result['closed_at']=$course->closed_at;
                     $result['created_at']=$course->created_at;
                     $result['is_oa']=$course->is_oa;//是否开源
+                    $result['view_level']=$course->view_level;//是否开源
                     //计算课程是否是主讲人自己的课程
                     $result['is_me']=0;
                     $result['is_fav']= 0;
