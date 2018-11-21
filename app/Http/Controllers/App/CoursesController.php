@@ -34,10 +34,10 @@ class CoursesController extends Controller{
         $page_number = $request->input('page_number')??10;//每页显示
         if($request->input('c_id')){
             if($request->input('c_id')==999){
-                $sql = Courses::where('is_publish','=',1)->where('is_home',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+                $sql = Courses::where('is_publish','=',1)->where('is_del',0)->where('is_home',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
             }else{
                 //初始化sql
-                $sql = Courses::where('is_publish','=',1)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
+                $sql = Courses::where('is_publish','=',1)->where('is_del',0)->where('c_id',$request->input('c_id'))->orderBy('opened_at','desc')->orderBy('created_at','desc');
             }
             //附加条件,模糊查询 课程标题、讲师姓名或昵称
             if($request->input('keyword')){
@@ -85,7 +85,7 @@ class CoursesController extends Controller{
         $page_index = $request->input('page_index')??1;//页码
         $page_number = $request->input('page_number')??10;//每页显示
         //初始化sql
-        $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish','=',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+        $sql = Courses::where('status',1)->where('is_del',0)->where('is_home',1)->where('is_publish','=',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
         //附加条件,模糊查询 课程标题、讲师姓名或昵称
         if($request->input('keyword')){
             $key = $request->input('keyword');
@@ -133,7 +133,7 @@ class CoursesController extends Controller{
         $login_user = $request->input('login_user');//讲师id
         if($login_user){
             //初始化sql
-            $sql = Courses::where('status',1)->where('is_home',1)->where('is_publish',1)->where('lecturer_id',$login_user)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+            $sql = Courses::where('status',1)->where('is_del',0)->where('is_home',1)->where('is_publish',1)->where('lecturer_id',$login_user)->orderBy('opened_at','desc')->orderBy('created_at','desc');
             $total = $sql->count();
             $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
@@ -187,7 +187,7 @@ class CoursesController extends Controller{
         $login_user = $request->input('login_user');//讲师id
         if($login_user){
             //初始化sql
-            $sql = Orders::where('courses_orders.user_id',$login_user)->where('courses.is_publish',1)->where('courses_orders.order_status',1)->orderBy('courses_orders.completed_at','desc')
+            $sql = Orders::where('courses_orders.user_id',$login_user)->where('courses.is_publish',1)->where('courses.is_del',0)->where('courses_orders.order_status',1)->orderBy('courses_orders.completed_at','desc')
                     ->leftJoin('courses','courses.course_id','courses_orders.course_id');
             $total = $sql->count();
             $list = $sql->select('courses.course_id','courses.title',DB::raw('strip_tags(jl_courses.description) as description'),'courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.is_live','courses.is_oa','courses.coin_price','courses.now_price','courses.audio_url','courses.opened_at','courses.closed_at','courses.created_at')
@@ -238,7 +238,7 @@ class CoursesController extends Controller{
         $page_index = $request->input('page_index')??1;//页码
         $page_number = $request->input('page_number')??10;//每页显示
         //初始化sql
-        $sql = Courses::where('status',1)->where('is_publish',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+        $sql = Courses::where('status',1)->where('is_del',0)->where('is_publish',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
         //附加条件,模糊查询 课程标题、讲师姓名或昵称
         if($request->input('keyword')){
             $key = trim($request->input('keyword')," ");
@@ -294,7 +294,7 @@ class CoursesController extends Controller{
         $course_id = $request->input('course_id');
         if($course_id){
             //查询课程分类
-            $list = Courses::whereRaw("c_id  = (select c_id from jl_courses where course_id=".$course_id.") and course_id <> ".$course_id)
+            $list = Courses::where('is_del',0)->whereRaw("c_id  = (select c_id from jl_courses where course_id=".$course_id.") and course_id <> ".$course_id)
                 ->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->orderBy('created_at','desc')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
@@ -324,7 +324,7 @@ class CoursesController extends Controller{
      */
     public function get_course_detail(Request $request){
         if($request->input('course_id')){
-            $course = Courses::where('course_id',$request->input('course_id'))->first();
+            $course = Courses::where('course_id',$request->input('course_id'))->where('courses.is_del',0)->first();
             if($course){
                 if($course->status==0){
                     $code = array('dec'=>$this->course_disable_err);
@@ -503,7 +503,7 @@ class CoursesController extends Controller{
                     $course_ids[] = $c['course_id'];
                 }
             }
-            $result = Courses::whereIn('course_id',$course_ids)->where('is_publish',1)->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $result = Courses::whereIn('course_id',$course_ids)->where('is_del',0)->where('is_publish',1)->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
                 ->get()->toArray();
             $code = array('dec'=>$this->success,'data'=>$result);
         }
@@ -562,7 +562,7 @@ class CoursesController extends Controller{
     public function get_course_sections(Request $request){
         $course_id = $request->input('course_id');
         if($course_id){
-            $sql = Sections::where('course_id',$course_id);
+            $sql = Sections::where('course_id',$course_id)->where('is_del',0);
             $total = $sql->count();
             $sort = 'asc';
             $sort_str = $request->input('sort')??null;

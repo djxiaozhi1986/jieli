@@ -77,7 +77,7 @@ class CoursesController extends Controller{
         $type = $request->input('type')."";
         $status = $request->input('status')."";
         //初始化sql
-        $sql = Courses::where('status',1)->orderBy('opened_at','desc')->orderBy('created_at','desc');
+        $sql = Courses::where('status',1)->where('is_del',0)->orderBy('created_at','desc');
         //附加条件,模糊查询 课程标题、讲师姓名或昵称
         if($request->input('keyword')){
             $key = $request->input('keyword');
@@ -336,7 +336,7 @@ class CoursesController extends Controller{
         $page_index = $request->input('page_index')??1;//页码
         $page_number = $request->input('page_number')??10;//每页显示
         if($course_id){
-            $sql = Sections::where('course_id',$course_id);
+            $sql = Sections::where('course_id',$course_id)->where('is_del',0);
             $total = $sql->count();
 //            var_dump($request->input('course_id'));die;
             $sort = 'asc';
@@ -600,6 +600,7 @@ class CoursesController extends Controller{
             $save_data['lecturer_id']   = $request->input('lecturer_id');
             $save_data['lecturer_name'] = $request->input('lecturer_name');
             $save_data['cover']         = $request->input('cover');
+            $save_data['img_list']         = $request->input('img_list');
 //            $save_data['audio_url']     = $request->input('audio_url');
             $save_data['opened_at']     = $request->input('opened_at');
             $save_data['closed_at']     = $request->input('closed_at');
@@ -747,10 +748,12 @@ class CoursesController extends Controller{
      */
     public function del_course(Request $request){
         if($request->input("course_id")){
-            $res = Courses::where('course_id',$request->input("course_id"))->delete();
+            $data['is_del'] = 1;
+            $res = Courses::where('course_id',$request->input("course_id"))->update($data);
             if($res){
                 //删除章节
-                Sections::where('course_id',$request->input("course_id"))->delete();
+                $sdata['is_del'] = 1;
+                Sections::where('course_id',$request->input("course_id"))->update($sdata);
                 $code = array('dec' => $this->success);
             }else{
                 $code = array('dec'=>$this->error);
@@ -860,7 +863,8 @@ class CoursesController extends Controller{
     public function del_section(Request $request){
         $id = $request->input('id');
         if($id){
-            $res = Sections::where('section_id',$id)->delete();
+            $sdata['is_del']=1;
+            $res = Sections::where('section_id',$id)->update($sdata);
             if($res){
                 $code = array('dec' => $this->success);
             }else{
