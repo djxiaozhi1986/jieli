@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\libraries\HttpClient;
+use App\Modules\Brands;
+use App\Modules\Industrys;
+use Cache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
+use Log;
 
 class ExampleController extends Controller
 {
@@ -719,7 +722,7 @@ class ExampleController extends Controller
 //            var_dump($value["name"]);
             $data['industry_id'] = "".$this->create_token();
             $data['industry_name'] = $value["name"];
-            DB::table('industrys')->insert($data);
+            DB::table('Industrys.php')->insert($data);
             $industry_id = $data['industry_id'];
             foreach ($value['brands'] as $br){
                 $b_data['brand_id'] =  "".$this->create_token();
@@ -735,18 +738,19 @@ class ExampleController extends Controller
      * 获取所有bi挖掘所用的资源
      */
     public function get_collect_resource(Request $request){
-        $industrys = DB::table('industrys')->get();
-        $brands = DB::table('brands')->get();
-        $industrys =  json_decode( json_encode( $industrys),true);
-        $brands =  json_decode( json_encode( $brands),true);
-//        var_dump($brands);die;
-        foreach ($industrys as $key=>$value){
-            foreach ($brands as $value1){
-                if($value['industry_id'] == $value1['industry_id']){
-                    $industrys[$key]['brands'][] = $value1;
+        $industrys = Cache::want('industrys',0,function() {
+            $industrys = Industrys::get()->toArray();
+            $brands = Brands::get()->toArray();
+            foreach ($industrys as $key=>$value){
+                foreach ($brands as $value1){
+                    if($value['industry_id'] == $value1['industry_id']){
+                        $industrys[$key]['brands'][] = $value1;
+                    }
                 }
             }
-        }
+            return $industrys;
+//            return Article::with('tags')->findOrFail($id,['id','cid','title','content_html as content','created_at','updated_at']);
+        });
         $code = array('dec'=>$this->success,'data'=>$industrys);
         return response()->json($code);
     }

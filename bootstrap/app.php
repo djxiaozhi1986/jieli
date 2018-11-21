@@ -73,6 +73,7 @@ $app->routeMiddleware([
 //     'auth' => App\Http\Middleware\Authenticate::class,
 // ]);
 
+
 /*
 |--------------------------------------------------------------------------
 | Register Service Providers
@@ -112,6 +113,21 @@ $app->alias('session', 'Illuminate\Session\SessionManager');
 //        new \Monolog\Handler\RotatingFileHandler($App->storagePath().'/logs/'.env('LOG_PREFIX').'.log',20)
 //    );
 //});
+
+
+//注册缓存存取宏
+Cache::macro('want',function($key,$minutes=0,$callback){
+    if (!$data = Cache::get($key)) {
+        $data = call_user_func($callback);
+        if ($minutes == 0) {
+            Cache::forever($key,$data);
+        } else {
+            Cache::put($key,$data,$minutes);
+        }
+    }
+    return $data;
+});
+
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {
