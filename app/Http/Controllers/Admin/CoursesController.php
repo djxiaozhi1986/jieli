@@ -918,12 +918,15 @@ class CoursesController extends Controller{
         return response()->json($res_json);
     }
     public function get_check_course_comments(Request $request){
+        $page_index = $request->input('page_index')??1;//页码
+        $page_number = $request->input('page_number')??10;//每页显示
         if($request->input('course_id')){
             //查询只针对课程的评价
             $sql = Comments::where('course_id',$request->input('course_id'))->where('is_verify',0);
             $total = $sql->count();
             $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)
                 ->get()->toArray();
             $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total);
         }else{
@@ -933,12 +936,15 @@ class CoursesController extends Controller{
     }
 
     public function get_refuse_course_comments(Request $request){
+        $page_index = $request->input('page_index')??1;//页码
+        $page_number = $request->input('page_number')??10;//每页显示
         if($request->input('course_id')){
             //查询只针对课程的评价
             $sql = Comments::where('course_id',$request->input('course_id'))->where('is_verify',-1);
             $total = $sql->count();
             $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)
                 ->get()->toArray();
             $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total);
         }else{
@@ -947,12 +953,15 @@ class CoursesController extends Controller{
         return response()->json($code);
     }
     public function get_pass_course_comments(Request $request){
+        $page_index = $request->input('page_index')??1;//页码
+        $page_number = $request->input('page_number')??10;//每页显示
         if($request->input('course_id')){
             //查询只针对课程的评价
             $sql = Comments::where('course_id',$request->input('course_id'))->where('is_verify',1);
             $total = $sql->count();
             $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')
+                ->skip(($page_index - 1) * $page_number)->take($page_number)
                 ->get()->toArray();
             $code = array('dec'=>$this->success,'data'=>$list,'total'=>$total);
         }else{
