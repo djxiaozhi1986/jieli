@@ -345,6 +345,9 @@ class CoursesController extends Controller{
                     if($course->cover){
                         $result['cover']=config('C.DOMAIN').$course->cover;
                     }
+                    if($course->img_list){
+                        $result['img_list']=$course->img_list;
+                    }
                     $result['is_home']=$course->is_home;
                     $result['is_live']=$course->is_live;
                     $result['opened_at']=$course->opened_at;
