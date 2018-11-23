@@ -157,8 +157,12 @@ class ArticlesController extends Controller
         $file = $request->file('file');
         if($file->isValid()){
             //检查mime
-            $fi = new \finfo(FILEINFO_MIME_TYPE);
-            if (!$this->_isImg($fi->file($file->getPathname()))) return 'error|您上传的不是图片';
+            $extension = $file->extension();
+            if (!$this->_isImg($extension)){
+                $result['errno']=-1;
+                $result['msg']='您上传的不是图片';
+                return response()->json($result);
+            }
 
             //上传图片
             $path = config('C.IMG_URL').'editor/';
