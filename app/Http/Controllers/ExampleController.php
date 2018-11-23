@@ -147,14 +147,14 @@ class ExampleController extends Controller
             $file->move($path,$filename);
             $save_path = $path.$filename;
             $result['errno']=0;
-            $result['data'][]=config('C.DOMAIN').$save_path;
+            $result['data'][]=config('C.DOMAIN1').$save_path;
             return response()->json($result);
         }
     }
     public function del_pics(Request $request){
         $imgs = $request['del_imgs'];
         foreach ($imgs as $item){
-            $item=str_replace(config('C.DOMAIN'),'',$item);
+            $item=str_replace(config('C.DOMAIN1'),'',$item);
             File::delete($item);
         }
         return 1;
