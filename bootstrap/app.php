@@ -134,6 +134,7 @@ $app->router->group([
     require __DIR__.'/../routes/auth.php';
     require __DIR__.'/../routes/web.php';
     require __DIR__.'/../routes/wechat.php';
+    require __DIR__.'/../routes/vipkid.php';
 });
 
 return $app;

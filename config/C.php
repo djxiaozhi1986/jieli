@@ -2,8 +2,8 @@
 
 return array(
     'ROOT_PATH'             =>      dirname(__DIR__),
-     'DOMAIN'                =>     'https://api.php.tiennet.com/',
-//    'DOMAIN'                =>     'http://jl.cn/',
+    'DOMAIN'                =>     'https://api.php.tiennet.com/',
+    'DOMAIN1'                =>     'http://api.kakusfot.com/',
     'IMG_URL'               =>      'uploads/images/',
     'FILE_URL'              =>      'uploads/files/',
     'UPLOAD_TMP'            =>      'uploads/tmp/',
