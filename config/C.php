@@ -3,7 +3,7 @@
 return array(
     'ROOT_PATH'             =>      dirname(__DIR__),
     'DOMAIN'                =>     'https://api.php.tiennet.com/',
-    'DOMAIN1'                =>     'http://api.kakusfot.com/',
+    'DOMAIN1'                =>     'http://api.kakusoft.com/',
     'IMG_URL'               =>      'uploads/images/',
     'FILE_URL'              =>      'uploads/files/',
     'UPLOAD_TMP'            =>      'uploads/tmp/',
