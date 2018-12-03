@@ -181,19 +181,27 @@ class ArticlesController extends Controller
         $req_token = $request->input('token');
         if($req_token){
             if($req_token == $token){
+                $is_pass = $request->input('is_pass')??1;
+                $date_req = $request->input('created_at')??time();
+                $today_start_str = date("Y-m-d",$date_req);
+                $today_end_str = date("Y-m-d 23:59:59",$date_req);
+                $today_start = strtotime($today_start_str);
+                $today_end = strtotime($today_end_str);
                 //返回数据
-                $result = Articles::where('is_send',0)->where('is_pass',1)
+                $result = Articles::where('is_pass',$is_pass)
+                    ->where('created_at','>=',$today_start)
+                    ->where('created_at','<=',$today_end)
                     ->select('article_id', 'title','description','content','created_at','is_pass','keywords','thumb')
                     ->get()->toArray();
                 if(count($result)>0){
                     $code = array('dec'=>array('code'=>0,'msg'=>'SUCCESS','data'=>$result));
                     //记录已经拉取结束
-                    foreach ($result as $key=>$value){
-                        $result[$key]['is_send']=1;
-                    }
-                    $this->updateBatch('articles',$result);
+//                    foreach ($result as $key=>$value){
+//                        $result[$key]['is_send']=1;
+//                    }
+//                    $this->updateBatch('articles',$result);
                 }else{
-                    $code = array('dec'=>array('code'=>-3,'msg'=>'没有新审核通过的文章'));
+                    $code = array('dec'=>array('code'=>-3,'msg'=>$today_start_str.',没有新审核通过的文章'));
                 }
             }else{
                 $code = array('dec'=>array('code'=>-2,'msg'=>'token无效'));
