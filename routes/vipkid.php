@@ -11,6 +11,10 @@
 |
 */
 
+$router->get('/mini/articles','ArticlesController@get_mini_articles');
+
+
+
 $router->get('/vipkid/articles','ArticlesController@get_articles');
 $router->get('/vipkid/articles/detail','ArticlesController@get_article_detail');
 $router->post('/vipkid/thumb','ArticlesController@upload_thumb');

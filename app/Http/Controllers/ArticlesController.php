@@ -13,6 +13,26 @@ use Illuminate\Support\Facades\DB;
 
 class ArticlesController extends Controller
 {
+
+    //小程序测试
+    public function get_mini_articles(Request $request){
+        $page_index = $request->input('page_index')??1;//页码
+        $page_number = $request->input('page_number')??10;//每页显示
+        //初始化sql
+        $sql = Articles::orderBy('created_at','desc');
+        //附加条件,模糊查询 课程标题、讲师姓名或昵称
+        if($request->input('keyword')){
+            $key = $request->input('keyword');
+            $sql = $sql->where('title','like','%'.$key.'%');
+        }
+        $total = $sql->count();
+        $list = $sql->select('article_id', 'title','description','created_at','keywords','thumb')->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
+        $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
     public function get_articles(Request $request){
         $page_index = $request->input('page_index')??1;//页码
         $page_number = $request->input('page_number')??10;//每页显示
