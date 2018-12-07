@@ -213,13 +213,14 @@ class ArticlesController extends Controller
                     ->where('created_at','<=',$today_end)
                     ->select('article_id', 'title','description','content','created_at','is_pass','keywords','thumb')
                     ->get()->toArray();
+                $total = count($result);
                 if(count($result)>0){
-                    $code = array('dec'=>array('code'=>0,'msg'=>'SUCCESS','data'=>$result));
+                    $code = array('dec'=>array('code'=>0,'msg'=>'SUCCESS','data'=>$result,'total'=>$total));
                     //记录已经拉取结束
-//                    foreach ($result as $key=>$value){
-//                        $result[$key]['is_send']=1;
-//                    }
-//                    $this->updateBatch('articles',$result);
+                    foreach ($result as $key=>$value){
+                        $result[$key]['is_send']=1;
+                    }
+                    $this->updateBatch('articles',$result);
                 }else{
                     $code = array('dec'=>array('code'=>-3,'msg'=>$today_start_str.',没有新审核通过的文章'));
                 }
@@ -242,18 +243,21 @@ class ArticlesController extends Controller
 
             $q = "UPDATE ".$tableName." SET ";
             foreach ( $updateColumn as $uColumn ) {
-                $q .=  $uColumn." = CASE ";
+                if($uColumn=='is_send') {
+                    $q .= $uColumn . " = CASE ";
 
-                foreach( $multipleData as $data ) {
-                    $q .= "WHEN ".$referenceColumn." = ".$data[$referenceColumn]." THEN '".$data[$uColumn]."' ";
+                    foreach ($multipleData as $data) {
+                        $q .= "WHEN " . $referenceColumn . " = " . $data[$referenceColumn] . " THEN '" . $data[$uColumn] . "' ";
+                    }
+                    $q .= "ELSE " . $uColumn . " END, ";
                 }
-                $q .= "ELSE ".$uColumn." END, ";
             }
             foreach( $multipleData as $data ) {
                 $whereIn .= "'".$data[$referenceColumn]."', ";
             }
             $q = rtrim($q, ", ")." WHERE ".$referenceColumn." IN (".  rtrim($whereIn, ', ').")";
 
+//            var_dump($q);die;
             // Update
             return DB::update(DB::raw($q));
 

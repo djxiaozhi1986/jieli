@@ -186,9 +186,11 @@ class CoursesController extends Controller{
                 $result['lecturer_name']=$course->lecturer_name;
                 $result['coin_price']=$course->coin_price;
                 $result['now_price']=$course->now_price;
+                $result['cover']="";
                 if($course->cover){
                     $result['cover']=$course->cover;
                 }
+                $result['img_list']="";
                 if($course->img_list){
                     $result['img_list']=$course->img_list;
                 }
