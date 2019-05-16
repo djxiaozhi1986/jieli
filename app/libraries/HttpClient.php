@@ -105,9 +105,7 @@ class HttpClient
             curl_setopt($ci, CURLOPT_HTTPHEADER, $headers );
         }
         $response = curl_exec($ci);
-        var_dump(curl_error($ci));
         curl_close ($ci);
-        var_dump($response);die;
         return $response;
     }
     public function ihttp_request($url, $post = '', $extra = array(), $timeout = 60) {

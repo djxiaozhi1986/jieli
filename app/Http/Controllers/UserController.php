@@ -326,8 +326,8 @@ class UserController extends Controller{
     }
     public function api_expert_class(Request $request){
         $user_id = $request->input('login_user');
-        $request_path = '/expert/expertClass';
-        $request_url = config('C.API_URL').$request_path;
+            $request_path = '/expert/expertClass';
+            $request_url = config('C.API_URL').$request_path;
 
         if($user_id){
             $params = ['user_id'=>$user_id];
@@ -344,7 +344,7 @@ class UserController extends Controller{
         $page_index = $request->input('page_index')??1;
         $forum_id = $request->input('forum_id');
         $name = $request->input('name');
-        $request_path = '/expert/list';
+	$request_path = '/expert/list';
         $request_url = config('C.API_URL').$request_path;
         $params = ['page_index'=>$page_index];
         if($user_id){
@@ -353,9 +353,9 @@ class UserController extends Controller{
         if($forum_id){
             $params['forum_id'] = $forum_id;
         }
-        if($name){
+	if($name){
             $params['name'] = $name;
-        }
+        }	
         $response = HttpClient::api_request($request_url,$params,'POST',true);
         $code = json_decode($response);
         return response()->json($code);
@@ -490,9 +490,9 @@ class UserController extends Controller{
 //            $lecturer = Users::where('user_id',$request->input('user_id'))->first();
             if($lecturer){
                 //获取主讲课程
-                $result =Courses::where('lecturer_id',$request->input('user_id'))
-                    ->where('is_publish','=',1)->where('is_del',0)
-                    ->select('course_id','title','description','coin_price','now_price','is_try','can_talk','lecturer_id',
+		$result =Courses::where('lecturer_id',$request->input('user_id'))
+->where('is_publish','=',1)->where('is_del',0)                
+    ->select('course_id','title','description','coin_price','now_price','is_try','can_talk','lecturer_id',
                         DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_home','is_live','opened_at','closed_at','created_at','is_oa',DB::raw('CONCAT("'.config('C.DOMAIN').'",img_list)  as img_list'))
                     ->skip(0)->take(3)->get()->toArray();
 
@@ -558,8 +558,8 @@ class UserController extends Controller{
                         }
                     }
                 }
-                $lecturer['courses'] = $result;
-                //相关问答？？？？
+		$lecturer['courses'] = $result;
+		//相关问答？？？？
                 $code = array('dec' => $this->success, 'data' => $lecturer);
             }else{
                 $code = array('dec'=>array('code'=>'060002','msg'=>'不存在的主讲人'));

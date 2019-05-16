@@ -41,6 +41,10 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->post('/courses/course/praise','CoursesController@add_course_praise');
     //评论点赞 *************
     $router->post('/courses/comment/praise','CoursesController@add_comment_praise');
+    //微课取消点赞
+    $router->post('/courses/course/unpraise','CoursesController@course_un_praise');
+    //评论取消点赞
+    $router->post('/courses/comment/unpraise','CoursesController@comment_un_praise');
     //我的收藏 *************
     $router->get('/courses/myfavorites','CoursesController@my_favorites');
     //收藏 *************
@@ -59,6 +63,7 @@ $router->group(['namespace' => 'App'], function($router) {
     $router->get('/courses/lecturer','CoursesController@get_lecturer_courses_list');
     $router->get('/courses/user','CoursesController@get_user_courses_list');
     $router->get('/courses/keys/hot','CoursesController@get_hot_keys');
+    $router->get('/courses/talk','CoursesController@get_course_talk');
 
 
     /*微课分类*/
@@ -166,9 +171,11 @@ $router->group(['namespace' => 'Admin'], function($router) {
     $router->post('/admin/courses/save','CoursesController@save_course');
     $router->get('/admin/courses/sections','CoursesController@get_course_sections');
     $router->post('/admin/courses/sections/add','CoursesController@add_section');
+    $router->post('/admin/courses/sections/edit','CoursesController@edit_section');
     $router->delete('/admin/courses/sections/del','CoursesController@del_section');
     $router->post('/admin/courses/publish','CoursesController@publish');
     $router->post('/admin/courses/down','CoursesController@down');
+    $router->post('/admin/courses/talk/ban','CoursesController@ban_course_talk');
     //课程列表 *************
     $router->get('/admin/courses/list','CoursesController@get_courses_list');
     //课程明细
@@ -207,4 +214,12 @@ $router->group(['namespace' => 'Admin'], function($router) {
     //创建课程
     //课程分类管理
     //订单管理
+
+    $router->get('/admin/ds/weeknumber','DashboardController@getWeekNumber');
+    $router->get('/admin/ds/order','DashboardController@getOrder');
+    $router->get('/admin/order/list','DashboardController@order_list');
+
+
+    $router->post('/admin/zip/add','CoursesController@create_zip');
+    $router->get('/admin/zip/get','CoursesController@get_zip');
 });

@@ -76,6 +76,7 @@ class CoursesController extends Controller{
         $page_number = $request->input('page_number')??10;//每页显示
         $type = $request->input('type')."";
         $status = $request->input('status')."";
+        $is_publish = $request->input('is_publish')."";
         //初始化sql
         $sql = Courses::where('status',1)->where('is_del',0)->orderBy('created_at','desc');
         //附加条件,模糊查询 课程标题、讲师姓名或昵称
@@ -113,8 +114,18 @@ class CoursesController extends Controller{
                     break;
             }
         }
+        if($is_publish!="-1"){
+            switch ($is_publish){
+                case "0":
+                    $sql = $sql->where('is_publish',0);
+                    break;
+                case "1":
+                    $sql = $sql->where('is_publish',1);
+                    break;
+            }
+        }
         $total = $sql->count();
-        $list = $sql->select('course_id','title','description','lecturer_name','cover','is_live','is_good','coin_price','now_price','audio_url','opened_at','closed_at','created_at','is_publish','im_group_id')
+        $list = $sql->select('course_id','title','description','lecturer_name','cover','is_live','is_good','coin_price','now_price','audio_url','opened_at','closed_at','created_at','is_publish','im_group_id','can_talk','is_zip')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
         foreach ($list as $key=>$value){
             //计算课程状态
@@ -132,17 +143,9 @@ class CoursesController extends Controller{
                 //未知
                 $result['status']='未知';
             }
-            //此微课的点赞数量
-            $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
-            //当前登录用户是否已经点过赞
-            if($request->input('login_user')){
-                $exits = Praises::where('from_user',$request->input('login_user'))->where('course_id',$value['course_id'])->exists();
-                if($exits){
-                    $list[$key]['is_praise'] = 1;//已经点赞
-                }else{
-                    $list[$key]['is_praise'] = 0;//未点赞
-                }
-            }
+
+            //此微课的待评论数量
+            $list[$key]['check_count'] = Comments::where('course_id',$value['course_id'])->where('is_verify',0)->count();
         }
         $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         $json_str = json_encode($code);
@@ -504,10 +507,8 @@ class CoursesController extends Controller{
      * @param Request $request [description]
      */
     public function Upload(Request $request){
-        if (!$request->hasFile('file')) {
-            $code = array('dec' => $this->http_file_err);
-        } else {
-            $file = $request->file('file');
+        $file = $request->file('file');
+        if ($file) {
             if ($file->isValid()) {
                 //检查mime
 //                $fi = new \finfo(FILEINFO_MIME_TYPE);
@@ -531,6 +532,8 @@ class CoursesController extends Controller{
             }else{
                 $code = array('dec' => $this->http_file_err);
             }
+        }else{
+            $code = array('dec' => $this->http_file_err);
         }
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
@@ -543,30 +546,18 @@ class CoursesController extends Controller{
      * @param Request $request [description]
      */
     public function UploadAudio(Request $request){
-        if (!$request->hasFile('file')) {
-            $code = array('dec' => $this->http_file_err);
-        } else {
+        $file = $request->file('file');
+        if ($file) {
             $file = $request->file('file');
-            if ($file->isValid()) {
-                //检查mime
-//                $fi = new \finfo(FILEINFO_MIME_TYPE);
-//                if (!$this->_isAudio($fi->file($file->getPathname()))) return response()->json(['dec' => $this->http_mime_err]);
-
-                // if(!$request->input('file_type')){
-                //     $path = $path . $request->input('file_type').'/';
-                // }else{
-                //     $path = $path;
-                // }
-                $path = config('C.FILE_URL');
-                $file_prefix = date("YmdHis").rand(100, 200);
-                $extension = $file->getClientOriginalExtension();
-                $filename = $file_prefix . '.' . $extension;
-                $file->move($path, $filename);
-                $avator = $path.$filename;
-                $code = array('dec' => $this->success,'data'=>$avator);
-            }else{
-                $code = array('dec' => $this->http_file_err);
-            }
+            $path = config('C.FILE_URL');
+            $file_prefix = date("YmdHis").rand(100, 200);
+            $extension = $file->getClientOriginalExtension();
+            $filename = $file_prefix . '.' . $extension;
+            $file->move($path, $filename);
+            $avator = $path.$filename;
+            $code = array('dec' => $this->success,'data'=>$avator);
+        }else{
+            $code = array('dec' => $this->http_file_err);
         }
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
@@ -602,7 +593,7 @@ class CoursesController extends Controller{
      * @return [type]           [description]
      */
     public function save_course(Request $request){
-        if($request->input("title") && $request->input("description") && $request->input("lecturer_id") && $request->input("lecturer_name") && $request->input("cover")  && $request->input('opened_at') && $request->input('closed_at')){
+        if($request->input("title") && $request->input("description") && $request->input("lecturer_id") && $request->input("lecturer_name") && $request->input("cover")){
             $save_data['title']         = $request->input('title');
             $save_data['description']   = $request->input('description');
             $save_data['lecturer_id']   = $request->input('lecturer_id');
@@ -610,8 +601,14 @@ class CoursesController extends Controller{
             $save_data['cover']         = $request->input('cover');
             $save_data['img_list']         = $request->input('img_list');
 //            $save_data['audio_url']     = $request->input('audio_url');
-            $save_data['opened_at']     = $request->input('opened_at');
-            $save_data['closed_at']     = $request->input('closed_at');
+            if($request->input('opened_at') && $request->input('closed_at')){
+                $save_data['opened_at']     = $request->input('opened_at');
+                $save_data['closed_at']     = $request->input('closed_at');
+            }else{
+                $t = time();
+                $save_data['opened_at'] = $t;
+                $save_data['closed_at'] = $t;
+            }
             $save_data['c_id']     = $request->input('c_id');
             if($request->input('coin_price')){
                 $save_data['coin_price'] = $request->input('coin_price');
@@ -648,7 +645,23 @@ class CoursesController extends Controller{
                 $code = array('dec'=>$this->error);
             }
         }else{
-            $code = array('dec'=>$this->client_err);
+//            $request->input("title") && $request->input("description") && $request->input("lecturer_id") && $request->input("lecturer_name") && $request->input("cover")
+            if($request->input("title")==null || $request->input("title")==''){
+                $code = array('dec' => array('code' => '060006', 'msg' => '请输入标题'));
+                return response()->json($code);
+            }
+            if($request->input("description")==null || $request->input("description")==''){
+                $code = array('dec' => array('code' => '060006', 'msg' => '请输入描述'));
+                return response()->json($code);
+            }
+            if($request->input("lecturer_id")==null || $request->input("lecturer_id")==''){
+                $code = array('dec' => array('code' => '060006', 'msg' => '请选择讲师'));
+                return response()->json($code);
+            }
+            if($request->input("cover")==null || $request->input("cover")==''){
+                $code = array('dec' => array('code' => '060006', 'msg' => '请上传封皮'));
+                return response()->json($code);
+            }
         }
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
@@ -868,6 +881,39 @@ class CoursesController extends Controller{
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
     }
+
+    public function edit_section(Request $request){
+        $section_id = $request->input('section_id');
+        $course_id = $request->input('course_id');
+        $audio_url = $request->input('audio_url');
+        $title = $request->input('title');
+        $price = $request->input('price');
+        $cion = $request->input('cion');
+        $is_try = $request->input('is_try');
+        $order_index = $request->input('order_index');
+        if($section_id && $course_id && $audio_url && $title){
+            $data['course_id'] = $course_id;
+            $data['audio_url'] = $audio_url;
+            $data['title'] = $title;
+            $data['price'] = $price??0;
+            $data['cion'] = $cion??0;
+            $data['is_try'] = $is_try??0;
+            $data['order_index'] = $order_index??0;
+            $data['created_at'] = time();
+            $res = Sections::where('section_id',$section_id)->update($data);
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec'=>$this->error);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
     public function del_section(Request $request){
         $id = $request->input('id');
         if($id){
@@ -889,6 +935,25 @@ class CoursesController extends Controller{
         $course_id = $request->input('course_id');
         if($course_id){
             $data['is_publish'] = 1;
+            $res = Courses::where('course_id',$course_id)->update($data);
+            if($res){
+                $code = array('dec' => $this->success);
+            }else{
+                $code = array('dec'=>$this->error);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+    //课程禁言|解禁
+    public function ban_course_talk(Request $request){
+        $course_id = $request->input('course_id');
+        if($course_id){
+            $can_talk = $request->input('can_talk');
+            $data['can_talk'] = $can_talk;
             $res = Courses::where('course_id',$course_id)->update($data);
             if($res){
                 $code = array('dec' => $this->success);
@@ -926,7 +991,7 @@ class CoursesController extends Controller{
             //查询只针对课程的评价
             $sql = Comments::where('course_id',$request->input('course_id'))->where('is_verify',0);
             $total = $sql->count();
-            $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+            $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.116:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)
                 ->get()->toArray();
@@ -944,7 +1009,7 @@ class CoursesController extends Controller{
             //查询只针对课程的评价
             $sql = Comments::where('course_id',$request->input('course_id'))->where('is_verify',-1);
             $total = $sql->count();
-            $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+            $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.116:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)
                 ->get()->toArray();
@@ -961,7 +1026,7 @@ class CoursesController extends Controller{
             //查询只针对课程的评价
             $sql = Comments::where('course_id',$request->input('course_id'))->where('is_verify',1);
             $total = $sql->count();
-            $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+            $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.116:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)
                 ->get()->toArray();
@@ -975,7 +1040,7 @@ class CoursesController extends Controller{
     private function get_children_comments($parent_id,&$childrens){
         if($parent_id){
             $result = Comments::where('parent_id',$parent_id)
-                ->select('courses_comments.comment_id','courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at','courses_comments.praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+                ->select('courses_comments.comment_id','courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at','courses_comments.praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.116:81/uploads/face/",jl_user.user_face)  as from_user_face'))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')->where('is_verify',0)->get()->toArray();
             foreach ($result as $key=>$value){
                 $childrens[] = $value;
@@ -1000,6 +1065,26 @@ class CoursesController extends Controller{
         }else{
             $code = array('dec'=>$this->client_err);
         }
+        return response()->json($code);
+    }
+
+    public function create_zip(Request $request){
+        $group_id = $request->input('group_id');
+        $request_path = '/uzip/addZip';
+        $request_url = config('C.API_URL').$request_path;
+        $params = ['channel_id'=>$group_id];
+        $response = HttpClient::api_request($request_url,$params,'POST',true);
+        $code = json_decode($response);
+        return response()->json($code);
+    }
+
+    public function get_zip(Request $request){
+        $group_id = $request->input('group_id');
+        $request_path = '/uzip/getZip';
+        $request_url = config('C.API_URL').$request_path;
+        $params = ['channel_id'=>$group_id];
+        $response = HttpClient::api_request($request_url,$params,'POST',true);
+        $code = json_decode($response);
         return response()->json($code);
     }
 }

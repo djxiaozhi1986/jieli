@@ -192,13 +192,14 @@ class LoginController extends Controller{
                 }else{
                     $params['nickname'] = $user->user_name;
                 }
+
                 $response = HttpClient::api_request($request_url,$params,'POST',true);
                 $res = json_decode($response);
 
                 $this->set_user_app_sms($user->user_id,$user->user_name,$user->user_face,$user->nick_name);
                 $user->u_token = $res->data->u_token;
                 $user->user_pass = null;
-
+                $user->is_sms = 1;
                 $u = json_decode(json_encode($user),TRUE);
                 $code = array('dec'=>$this->success,'data'=>$u);
                 $json_str = json_encode($code);

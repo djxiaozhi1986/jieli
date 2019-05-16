@@ -21,7 +21,7 @@ class Users extends Model
     protected $fillable = ['user_id', 'user_name', 'user_pass', 'real_name','nick_name','user_type','user_level','user_face','device_type','user_points',
         'email','phone','sex','birthday','jieli_coin','jieli_coin_frozen','new_msg','activity','questions','answers','best','join_activity',
         'pub_comment','pub_read','zan','follows','remark','intro','award','works','user_title','province_id','province_name','city_id','city_name','county_id','county_name',
-        'town_id','town_name','address','industry_id','interest_range','interest_type','add_time','login_time','is_deleted','wx_id','wx_face_download','','','','','','','',''];
+        'town_id','town_name','address','industry_id','interest_range','interest_type','add_time','login_time','is_deleted','wx_id','wx_face_download'];
     public $primaryKey = "user_id";//主键
     public $timestamps = false;//是否自动生成时间戳
 }

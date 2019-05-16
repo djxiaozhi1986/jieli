@@ -21,8 +21,8 @@ class CategorysController extends Controller{
      * @return \Illuminate\Http\JsonResponse
      */
     public function getTopCategorys(Request $request){
-        $total = Categorys::where('parent_id',0)->where('status',1)->count();
-        $res = Categorys::where('parent_id',0)->where('status',1)->select('category_id','category_name','sort')->orderBy('sort','asc')->get()->toArray();
+        $total = Categorys::where('parent_id',0)->where('status',1)->where('category_id','<>',999)->count();
+        $res = Categorys::where('parent_id',0)->where('status',1)->where('category_id','<>',999)->select('category_id','category_name','sort')->orderBy('sort','asc')->get()->toArray();
         $data = [];
         foreach ($res as $key=>$value){
             $item['c_id']= $value['category_id']."";

@@ -23,7 +23,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CoursesController extends Controller{
-
     /**
      * 分类课程
      * @param Request $request
@@ -48,7 +47,7 @@ class CoursesController extends Controller{
                 });
             }
             $total = $sql->count();
-            $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover) as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover) as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at',DB::raw('CONCAT("'.config('C.DOMAIN').'",img_list)  as img_list'),'can_talk')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($list as $key=>$value){
                 //此微课的点赞数量
@@ -61,11 +60,25 @@ class CoursesController extends Controller{
                         $list[$key]['is_praise'] = 1;//已经点赞
                     }
                 }
+                //计算课程状态
+                $now = time();
+                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                    //课程正在直播
+                    $list[$key]['status']=1;
+                }else if($now<$value['opened_at']){
+                    //未开始
+                    $list[$key]['status']=0;
+                }else if($now>$value['closed_at']){
+                    //已经结束
+                    $list[$key]['status']=2;
+                }
                 if($value['is_live']==1){
                     $list[$key]['is_online']=1;
                 }else{
                     $list[$key]['is_online']=0;
                 }
+                $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+                $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
             }
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
@@ -95,7 +108,7 @@ class CoursesController extends Controller{
             });
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at',DB::raw('CONCAT("'.config('C.DOMAIN').'",img_list)  as img_list'),'can_talk')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
 
 //        array_walk_recursive($list, $this->convertNull());
@@ -110,11 +123,25 @@ class CoursesController extends Controller{
                     $list[$key]['is_praise'] = 1;//已经点赞
                 }
             }
+            //计算课程状态
+            $now = time();
+            if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                //课程正在直播
+                $list[$key]['status']=1;
+            }else if($now<$value['opened_at']){
+                //未开始
+                $list[$key]['status']=0;
+            }else if($now>$value['closed_at']){
+                //已经结束
+                $list[$key]['status']=2;
+            }
             if($value['is_live']==1){
                 $list[$key]['is_online']=1;
             }else{
                 $list[$key]['is_online']=0;
             }
+            $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+            $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
         }
         $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         $json_str = json_encode($code);
@@ -135,7 +162,7 @@ class CoursesController extends Controller{
             //初始化sql
             $sql = Courses::where('status',1)->where('is_del',0)->where('is_home',1)->where('is_publish',1)->where('lecturer_id',$login_user)->orderBy('opened_at','desc')->orderBy('created_at','desc');
             $total = $sql->count();
-            $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at',DB::raw('CONCAT("'.config('C.DOMAIN').'",img_list)  as img_list'),'can_talk')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($list as $key=>$value){
                 //此微课的点赞数量
@@ -149,6 +176,7 @@ class CoursesController extends Controller{
                     }
                 }
 
+
                 //计算课程状态
                 $now = time();
                 if($now<=$value['closed_at'] && $now>=$value['opened_at']){
@@ -161,12 +189,13 @@ class CoursesController extends Controller{
                     //已经结束
                     $list[$key]['status']=2;
                 }
-
                 if($value['is_live']==1){
                     $list[$key]['is_online']=1;
                 }else{
                     $list[$key]['is_online']=0;
                 }
+                $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+                $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
             }
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
@@ -190,7 +219,7 @@ class CoursesController extends Controller{
             $sql = Orders::where('courses_orders.user_id',$login_user)->where('courses.is_publish',1)->where('courses.is_del',0)->where('courses_orders.order_status',1)->orderBy('courses_orders.completed_at','desc')
                     ->leftJoin('courses','courses.course_id','courses_orders.course_id');
             $total = $sql->count();
-            $list = $sql->select('courses.course_id','courses.title',DB::raw('strip_tags(jl_courses.description) as description'),'courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.is_live','courses.is_oa','courses.coin_price','courses.now_price','courses.audio_url','courses.opened_at','courses.closed_at','courses.created_at')
+            $list = $sql->select('courses.course_id','courses.title',DB::raw('strip_tags(jl_courses.description) as description'),'courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.is_live','courses.is_oa','courses.coin_price','courses.now_price','courses.audio_url','courses.opened_at','courses.closed_at','courses.created_at',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.img_list)  as img_list'),'courses.can_talk')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($list as $key=>$value){
                 //此微课的点赞数量
@@ -203,6 +232,7 @@ class CoursesController extends Controller{
                         $list[$key]['is_praise'] = 1;//已经点赞
                     }
                 }
+
                 //计算课程状态
                 $now = time();
                 if($now<=$value['closed_at'] && $now>=$value['opened_at']){
@@ -220,6 +250,8 @@ class CoursesController extends Controller{
                 }else{
                     $list[$key]['is_online']=0;
                 }
+                $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+                $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
             }
             $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
@@ -250,7 +282,7 @@ class CoursesController extends Controller{
             //查询关键词是否搜索过
             $exists = DB::table('courses_search_keys')->where('keyword',$key)->exists();
             if($exists){
-                DB::table('courses_search_keys')->increment('count', 1, ['keyword' => $key]);
+                DB::table('courses_search_keys')->where('keyword',$key)->increment('count', 1);
             }else{
                 $skey['keyword'] = $key;
                 $skey['count'] = 1;
@@ -258,7 +290,7 @@ class CoursesController extends Controller{
             }
         }
         $total = $sql->count();
-        $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+        $list = $sql->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at',DB::raw('CONCAT("'.config('C.DOMAIN').'",img_list)  as img_list'),'can_talk')
             ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
         foreach ($list as $key=>$value){
             //此微课的点赞数量
@@ -271,11 +303,25 @@ class CoursesController extends Controller{
                     $list[$key]['is_praise'] = 1;//已经点赞
                 }
             }
+            //计算课程状态
+            $now = time();
+            if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                //课程正在直播
+                $list[$key]['status']=1;
+            }else if($now<$value['opened_at']){
+                //未开始
+                $list[$key]['status']=0;
+            }else if($now>$value['closed_at']){
+                //已经结束
+                $list[$key]['status']=2;
+            }
             if($value['is_live']==1){
                 $list[$key]['is_online']=1;
             }else{
                 $list[$key]['is_online']=0;
             }
+            $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+            $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
         }
         $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         $json_str = json_encode($code);
@@ -294,19 +340,40 @@ class CoursesController extends Controller{
         $course_id = $request->input('course_id');
         if($course_id){
             //查询课程分类
-            $list = Courses::where('is_del',0)->whereRaw("c_id  = (select c_id from jl_courses where course_id=".$course_id.") and course_id <> ".$course_id)
-                ->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $list = Courses::where('is_del',0)->where('is_publish',1)->whereRaw("c_id  = (select c_id from jl_courses where course_id=".$course_id.") and course_id <> ".$course_id)
+                ->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at',DB::raw('CONCAT("'.config('C.DOMAIN').'",img_list)  as img_list'),'can_talk')
                 ->orderBy('created_at','desc')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             foreach ($list as $key=>$value){
                 //此微课的点赞数量
                 $list[$key]['praise_num'] = Praises::where('course_id',$value['course_id'])->count();
                 $list[$key]['is_praise'] = 0;//未点赞
-//                if($value['is_live']==1){
-//                    $list[$key]['is_online']=1;
-//                }else{
-//                    $list[$key]['is_online']=0;
-//                }
+		//关联当前登录用户是否已经购买
+                $exits = Orders::where("course_id",$value['course_id'])->where("user_id",$request->input("login_user"))->where('order_status',1)->exists();
+                $list[$key]['is_buy'] = 0;
+                if($exits){
+                    //已经购买
+                    $list[$key]['is_buy'] = 1;
+                }
+                //计算课程状态
+                $now = time();
+                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                    //课程正在直播
+                    $list[$key]['status']=1;
+                }else if($now<$value['opened_at']){
+                    //未开始
+                    $list[$key]['status']=0;
+                }else if($now>$value['closed_at']){
+                    //已经结束
+                    $list[$key]['status']=2;
+                }
+                if($value['is_live']==1){
+                    $list[$key]['is_online']=1;
+                }else{
+                    $list[$key]['is_online']=0;
+                }
+                $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+                $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
             }
             $code = array('dec'=>$this->success,'data'=>$list);
         }else{
@@ -347,6 +414,8 @@ class CoursesController extends Controller{
                     }
                     if($course->img_list){
                         $result['img_list']=config('C.DOMAIN').$course->img_list;
+                    }else{
+                        $result['img_list']="";
                     }
                     $result['is_home']=$course->is_home;
                     $result['is_live']=$course->is_live;
@@ -360,9 +429,11 @@ class CoursesController extends Controller{
                     $result['is_fav']= 0;
                     $result['is_buy'] = 0;
                     $result['is_try'] = $course->is_try;
+                    $result['can_talk'] = $course->can_talk;
                     if($request->input('login_user')){
                         if($request->input('login_user')==$course->lecturer_id){
                             $result['is_me']=1;
+                            $result['can_talk'] = 1;//我如果是这个课程的讲师，随意发言
                         }else{
                             //计算当前用户是否已经购买了此课程
                             //微课订单中查看,不包含讲师自己，该课程该用户已经购买成功
@@ -376,6 +447,11 @@ class CoursesController extends Controller{
                         if($fav){
                             $result['is_fav'] = 1;
                         }
+                        //添加足迹
+                        $foot['user_id'] = $save['user_id']  = $request->input('login_user');
+                        $foot['course_id'] = $save['course_id']  = $request->input('course_id');
+                        $save['in_time'] = time();
+                        Foots::updateOrCreate($foot,$save);
                     }
                     //收藏总数
                     $result['fav_count'] = Favorites::where('course_id',$course->course_id)->count();
@@ -387,25 +463,28 @@ class CoursesController extends Controller{
 //                    }
                     if($course->is_live==1){
                         $result['is_online']=1;
+                        //计算课程状态
+                        $now = time();
+                        if($now<=$course->closed_at && $now>=$course->opened_at){
+                            //课程正在直播
+                            $result['status']=1;
+                        }else if($now<$course->opened_at){
+                            //未开始
+                            $result['status']=0;
+                        }else if($now>$course->closed_at){
+                            //已经结束
+                            $result['status']=2;
+                        }else{
+                            //未知
+                            $result['status']=-1;
+                        }
                     }else{
                         $result['is_online']=0;
-                    }
-                    //计算课程状态
-                    $now = time();
-                    if($now<=$course->closed_at && $now>=$course->opened_at){
-                        //课程正在直播
                         $result['status']=1;
-                    }else if($now<$course->opened_at){
-                        //未开始
-                        $result['status']=0;
-                    }else if($now>$course->closed_at){
-                        //已经结束
-                        $result['status']=2;
-                    }else{
-                        //未知
-                        $result['status']=-1;
                     }
 
+                    $result['opened_at_str'] = date('Y-m-d H:i:s',$course->opened_at);
+                    $result['closed_at_str'] = date('Y-m-d H:i:s',$course->closed_at);
                     //课程讲师信息
                     if($course->lecturer_id){
                         //获取讲师信息
@@ -416,7 +495,7 @@ class CoursesController extends Controller{
                             if($lecturer->user_face){
                                 $index = strpos($lecturer->user_face,"http");
                                 if($index === false){
-                                    $result['lecturer_avator']="http://118.26.164.109:81/uploads/face/".$lecturer->user_face;
+                                    $result['lecturer_avator']="http://118.26.164.116:81/uploads/face/".$lecturer->user_face;
                                 }else{
                                     $result['lecturer_avator']=$lecturer->user_face;
                                 }
@@ -459,6 +538,39 @@ class CoursesController extends Controller{
         return response()->json($res_json);
     }
 
+    /**
+     *  课程是否禁言
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function get_course_talk(Request $request){
+        if($request->input('course_id')){
+            $course = Courses::select('can_talk','course_id','lecturer_id','status')->where('im_group_id',$request->input('course_id'))->where('courses.is_del',0)->first();
+            if($course){
+                if($course->status==0){
+                    $code = array('dec'=>$this->course_disable_err);
+                }elseif ($course->status==2){
+                    $code = array('dec'=>$this->course_close_err);
+                }else{
+                    $result['can_talk'] = $course->can_talk;
+                    if($request->input('login_user')){
+                        if($request->input('login_user')==$course->lecturer_id){
+                            $result['can_talk'] = 1;//我如果是这个课程的讲师，随意发言
+                        }
+                    }
+                    $code = array('dec'=>$this->success,'data'=>$result);
+                }
+            }else{
+                $code = array('dec'=>$this->course_nothing_err);
+            }
+        }
+        else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
     /***
      * 获取讲师列表
      * @param Request $request
@@ -506,9 +618,37 @@ class CoursesController extends Controller{
                     $course_ids[] = $c['course_id'];
                 }
             }
-            $result = Courses::whereIn('course_id',$course_ids)->where('is_del',0)->where('is_publish',1)->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at')
+            $list = Courses::whereIn('course_id',$course_ids)->where('is_del',0)->where('is_publish',1)->select('course_id','title',DB::raw('strip_tags(description) as description'),'lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'is_live','is_oa','coin_price','now_price','audio_url','opened_at','closed_at','created_at',DB::raw('CONCAT("'.config('C.DOMAIN').'",img_list)  as img_list'),'can_talk')
                 ->get()->toArray();
-            $code = array('dec'=>$this->success,'data'=>$result);
+            foreach ($list as $key=>$value){
+                //关联当前登录用户是否已经购买
+                $exits = Orders::where("course_id",$value['course_id'])->where("user_id",$request->input("login_user"))->where('order_status',1)->exists();
+                $list[$key]['is_buy'] = 0;
+                if($exits){
+                    //已经购买
+                    $list[$key]['is_buy'] = 1;
+                }
+                //计算课程状态
+                $now = time();
+                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                    //课程正在直播
+                    $list[$key]['status']=1;
+                }else if($now<$value['opened_at']){
+                    //未开始
+                    $list[$key]['status']=0;
+                }else if($now>$value['closed_at']){
+                    //已经结束
+                    $list[$key]['status']=2;
+                }
+                if($value['is_live']==1){
+                    $list[$key]['is_online']=1;
+                }else{
+                    $list[$key]['is_online']=0;
+                }
+                $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+                $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
+            }
+ 	    $code = array('dec'=>$this->success,'data'=>$list);
         }
         else{
             $code = array('dec'=>$this->client_err);
@@ -528,13 +668,14 @@ class CoursesController extends Controller{
             $total = Comments::where('course_id',$request->input('course_id'))->where('is_verify',1)->count();
             $overplus = 0;
             $res = Comments::where('course_id',$request->input('course_id'))->where('is_verify',1)
-                    ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+                    ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',
+                        DB::raw("(IF(LOCATE('http://',`jl_user`.`user_face`)=0,CONCAT('http://118.26.164.116:81/uploads/face/',`jl_user`.`user_face`),`jl_user`.`user_face`)) as from_user_face"))
                     ->leftJoin('user','user.user_id','courses_comments.from_user')
                     ->orderBy('praise_count','desc')->skip(0)->take(2)->get()->toArray();
             foreach ($res as $key=>$value){
                 //查询评论的评论
                 $res[$key]['childrens']=[];
-                $this->get_children_comments($value['comment_id'],$res[$key]['childrens']);
+                $this->get_children_comments1($value['comment_id'],$res[$key]['childrens']);
 //                $res[$key]['childrens'] = $children;
                 $res[$key]['is_praise'] = 0;//未点赞
                 $res[$key]['mdate'] = $this->mdate($value['created_at']);
@@ -599,9 +740,17 @@ class CoursesController extends Controller{
             //查询只针对课程的评价
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??5;
-            $sql = Comments::where('course_id',$request->input('course_id'))->whereNull('parent_id')->where('is_verify',1);
+		
+            $login_user = $request->input('login_user');
+            $sql = Comments::where('course_id',$request->input('course_id'))->whereNull('parent_id')
+                ->where(function($query) use($login_user){
+                    $query->where('from_user',$login_user)
+                        ->orWhere('is_verify',1);
+                });            
+		//$sql = Comments::where('course_id',$request->input('course_id'))->whereNull('parent_id')->where('is_verify',1);
             $total = $sql->count();
-            $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+            $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',
+                DB::raw("(IF(LOCATE('http://',`jl_user`.`user_face`)=0,CONCAT('http://118.26.164.116:81/uploads/face/',`jl_user`.`user_face`),`jl_user`.`user_face`)) as from_user_face"))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             //查询列表的回复列表
@@ -622,7 +771,7 @@ class CoursesController extends Controller{
 //                $list[$key]['childrens']  = $this->get_children_comments($value['comment_id']);
 
                 $list[$key]['childrens']=[];
-                $this->get_children_comments($value['comment_id'],$list[$key]['childrens']);
+                $this->get_children_comments($value['comment_id'],$list[$key]['childrens'],$login_user);
             }
             $con_sum = 0;
             $this->get_comment_sum($request->input('course_id'),$con_sum,1);
@@ -647,7 +796,8 @@ class CoursesController extends Controller{
             $page_number = $request->input('page_number')??5;
             $sql = Comments::where('parent_id',$request->input('comment_id'))->where('is_verify',1);
             $total = $sql->count();
-            $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+            $list =$sql ->select('comment_id','course_id', 'parent_id', 'content', 'from_user','from_user_name','to_user','to_user_name','created_at','praise_count as praise_num',
+                DB::raw("(IF(LOCATE('http://',`jl_user`.`user_face`)=0,CONCAT('http://118.26.164.116:81/uploads/face/',`jl_user`.`user_face`),`jl_user`.`user_face`)) as from_user_face"))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             //查询列表的回复列表
@@ -737,6 +887,65 @@ class CoursesController extends Controller{
                 }else{
                     $code = array('dec'=>$this->error);
                 }
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
+
+    /**
+     * 取消课程点赞
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function course_un_praise(Request $request){
+        if($request->input('course_id') && $request->input('login_user')){
+            //判断是否重复点赞
+            $exist = Praises::where('course_id',$request->input('course_id'))->where('from_user',$request->input('login_user'))->exists();
+            if($exist){
+                $res = Praises::where('course_id',$request->input('course_id'))->where('from_user',$request->input('login_user'))->delete();
+                if($res){
+                    //点赞递减
+                    Courses::where('course_id',$request->input('course_id'))->decrement('praise_count');
+                    $code = array('dec'=>$this->success);
+                }else{
+                    $code = array('dec'=>$this->error);
+                }
+            }else{
+                $code = array('dec'=>$this->success);
+            }
+        }else{
+            $code = array('dec'=>$this->client_err);
+        }
+        $json_str = json_encode($code);
+        $res_json = json_decode(\str_replace(':null', ':""', $json_str));
+        return response()->json($res_json);
+    }
+
+    /**
+     * 取消评论点赞
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function comment_un_praise(Request $request){
+        if($request->input('comment_id') && $request->input('login_user')){
+            //判断是否重复点赞
+            $exist = Praises::where('comment_id',$request->input('comment_id'))->where('from_user',$request->input('login_user'))->exists();
+            if($exist){
+                $res = Praises::where('comment_id',$request->input('comment_id'))->where('from_user',$request->input('login_user'))->delete();
+                if($res){
+                    //点赞叠加
+                    Comments::where('comment_id',$request->input('comment_id'))->decrement('praise_count');
+                    $code = array('dec'=>$this->success);
+                }else{
+                    $code = array('dec'=>$this->error);
+                }
+            }else{
+                $code = array('dec'=>$this->success);
             }
         }else{
             $code = array('dec'=>$this->client_err);
@@ -848,35 +1057,37 @@ class CoursesController extends Controller{
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
             //初始化sql
-            $sql = Favorites::where('courses_favorites.user_id',$request->input('login_user'))->where('courses.is_publish',1)->orderBy('courses_favorites.created_at','desc')
-                    ->leftJoin('courses','courses.course_id','courses_favorites.course_id');
+            $sql = Favorites::where('courses_favorites.user_id',$request->input('login_user'))
+                ->where('courses.is_publish',1)
+                ->where('courses.is_del',0)
+                ->orderBy('courses_favorites.created_at','desc')
+                ->leftJoin('courses','courses.course_id','courses_favorites.course_id');
 
             $total = $sql->count();
-            $result = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.coin_price','courses.is_live','courses.now_price','courses.created_at','courses.opened_at','courses.closed_at','courses.is_oa')
+            $list = $sql->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.coin_price','courses.is_live','courses.now_price','courses.created_at','courses.opened_at','courses.closed_at','courses.is_oa',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.img_list)  as img_list'),'courses.can_talk','courses.status')
                     ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
-            foreach ($result as $key=>$value){
+            foreach ($list as $key=>$value){
                 //计算课程状态
                 $now = time();
                 if($now<=$value['closed_at'] && $now>=$value['opened_at']){
                     //课程正在直播
-                    $result[$key]['status']=1;
+                    $list[$key]['status']=1;
                 }else if($now<$value['opened_at']){
                     //未开始
-                    $result[$key]['status']=0;
+                    $list[$key]['status']=0;
                 }else if($now>$value['closed_at']){
                     //已经结束
-                    $result[$key]['status']=2;
-                }else{
-                    //未知
-                    $result[$key]['status']=-1;
+                    $list[$key]['status']=2;
                 }
                 if($value['is_live']==1){
-                    $result[$key]['is_online']=1;
+                    $list[$key]['is_online']=1;
                 }else{
-                    $result[$key]['is_online']=0;
+                    $list[$key]['is_online']=0;
                 }
+                $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+                $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
             }
-            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
+            $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
             $code = array('dec'=>$this->client_err);
         }
@@ -894,11 +1105,14 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Carts::where('courses_carts.user_id',$request->input('login_user'));
+            $sql = Carts::where('courses_carts.user_id',$request->input('login_user'))
+                ->where('courses.is_del',0)
+                ->where('courses.is_publish',0)
+                ->where('courses.status',1)
+                ->leftJoin('courses','courses.course_id','courses_carts.course_id');
             $total = $sql->count();
-            $result = $sql->where('courses.status',1)->orderBy('courses_carts.add_time','desc')
-                ->leftJoin('courses','courses.course_id','courses_carts.course_id')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_carts.add_time')
+            $result = $sql->orderBy('courses_carts.add_time','desc')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_carts.add_time',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.img_list)  as img_list'),'courses.can_talk','courses.status')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
 
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
@@ -960,16 +1174,37 @@ class CoursesController extends Controller{
         return response()->json($code);
     }
 
-    private function get_children_comments($parent_id,&$childrens){
+    private function get_children_comments($parent_id,&$childrens,$login_user){
         if($parent_id){
-            $result = Comments::where('parent_id',$parent_id)->where('is_verify',1)
-                ->select('courses_comments.comment_id','courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at','courses_comments.praise_count as praise_num',DB::raw('CONCAT("http://118.26.164.109:81/uploads/face/",jl_user.user_face)  as from_user_face'))
+           // $result = Comments::where('parent_id',$parent_id)->where('is_verify',1)
+             $result = Comments::where('parent_id',$parent_id)
+                ->where(function($query) use($login_user){
+                    $query->where('from_user',$login_user)
+                        ->orWhere('is_verify',1);
+                })
+		        ->select('courses_comments.comment_id','courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at','courses_comments.praise_count as praise_num',
+                    DB::raw("(IF(LOCATE('http://',`jl_user`.`user_face`)=0,CONCAT('http://118.26.164.116:81/uploads/face/',`jl_user`.`user_face`),`jl_user`.`user_face`)) as from_user_face"))
                 ->leftJoin('user','user.user_id','courses_comments.from_user')->get()->toArray();
             foreach ($result as $key=>$value){
                 $value['mdate'] = $this->mdate($value['created_at']);
                 $childrens[] = $value;
                 //评论加到同级别
-                $this->get_children_comments($value['comment_id'],$childrens);
+                $this->get_children_comments($value['comment_id'],$childrens,$login_user);
+            }
+        }
+    }
+
+    private function get_children_comments1($parent_id,&$childrens){
+        if($parent_id){
+             $result = Comments::where('parent_id',$parent_id)->where('is_verify',1)
+                ->select('courses_comments.comment_id','courses_comments.content','courses_comments.from_user','courses_comments.from_user_name','courses_comments.to_user','courses_comments.to_user_name','courses_comments.created_at','courses_comments.praise_count as praise_num',
+                    DB::raw("(IF(LOCATE('http://',`jl_user`.`user_face`)=0,CONCAT('http://118.26.164.116:81/uploads/face/',`jl_user`.`user_face`),`jl_user`.`user_face`)) as from_user_face"))
+                ->leftJoin('user','user.user_id','courses_comments.from_user')->get()->toArray();
+            foreach ($result as $key=>$value){
+                $value['mdate'] = $this->mdate($value['created_at']);
+                $childrens[] = $value;
+                //评论加到同级别
+                $this->get_children_comments1($value['comment_id'],$childrens);
             }
         }
     }
@@ -1010,35 +1245,38 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'));
+            $sql = Orders::where('courses_orders.user_id',$request->input('login_user'))
+                ->where('courses_orders.order_status',1)
+                ->where("courses.is_publish",1)
+                ->where('courses.is_del',0)
+                ->leftJoin('courses','courses.course_id','courses_orders.course_id');
+//            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'));
             $total = $sql->count();
-            $result = $sql->orderBy('courses_users_relaction.created_at','desc')
-                    ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id')
-                    ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa','courses.coin_price','courses.now_price','courses.is_live')
+            $list = $sql->orderBy('courses_orders.created_at','desc')
+                    ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_orders.created_at','courses.is_oa','courses.coin_price','courses.now_price','courses.is_live',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.img_list)  as img_list'),'courses.can_talk','courses.status')
                     ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
-            foreach ($result as $key=>$value){
+            foreach ($list as $key=>$value){
                 //计算课程状态
                 $now = time();
                 if($now<=$value['closed_at'] && $now>=$value['opened_at']){
                     //课程正在直播
-                    $result[$key]['status']=1;
+                    $list[$key]['status']=1;
                 }else if($now<$value['opened_at']){
                     //未开始
-                    $result[$key]['status']=0;
+                    $list[$key]['status']=0;
                 }else if($now>$value['closed_at']){
                     //已经结束
-                    $result[$key]['status']=2;
-                }else{
-                    //未知
-                    $result[$key]['status']=-1;
+                    $list[$key]['status']=2;
                 }
                 if($value['is_live']==1){
-                    $result[$key]['is_online']=1;
+                    $list[$key]['is_online']=1;
                 }else{
-                    $result[$key]['is_online']=0;
+                    $list[$key]['is_online']=0;
                 }
+                $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+                $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
             }
-            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
+            $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
             return response()->json($code);
         }else{
             $code = array('dec'=>$this->client_err);
@@ -1056,31 +1294,37 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'))->where('courses.is_live',1)
-                ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id');
+            $sql = Orders::where('courses_orders.user_id',$request->input('login_user'))->where('courses_orders.order_status',1)->where("courses.is_publish",1);
+            $sql = $sql->where('courses.is_live',1)
+                ->where('courses.is_publish',1)
+                ->where('courses.is_del',0)
+                ->leftJoin('courses','courses.course_id','courses_orders.course_id');
             $total = $sql->count();
-            $result = $sql->orderBy('courses_users_relaction.created_at','desc')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa')
+            $list = $sql->orderBy('courses_orders.created_at','desc')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_orders.created_at','courses.is_oa','courses.coin_price','courses.now_price',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.img_list)  as img_list'),'courses.can_talk','courses.is_live','courses.status')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
-            foreach ($result as $key=>$value){
+            foreach ($list as $key=>$value){
                 //计算课程状态
                 $now = time();
                 if($now<=$value['closed_at'] && $now>=$value['opened_at']){
                     //课程正在直播
-                    $result[$key]['status']=1;
+                    $list[$key]['status']=1;
                 }else if($now<$value['opened_at']){
                     //未开始
-                    $result[$key]['status']=0;
+                    $list[$key]['status']=0;
                 }else if($now>$value['closed_at']){
                     //已经结束
-                    $result[$key]['status']=2;
-                }else{
-                    //未知
-                    $result[$key]['status']=-1;
+                    $list[$key]['status']=2;
                 }
-                $result[$key]['is_online']=1;
+                if($value['is_live']==1){
+                    $list[$key]['is_online']=1;
+                }else{
+                    $list[$key]['is_online']=0;
+                }
+                $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+                $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
             }
-            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
+            $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
             return response()->json($code);
         }else{
             $code = array('dec'=>$this->client_err);
@@ -1098,31 +1342,39 @@ class CoursesController extends Controller{
         if($request->input('login_user')){
             $page_index = $request->input('page_index')??1;//页码
             $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'))->where('courses.is_good',1)->where('courses.is_publish',1)
-                ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id');
+            $sql = Orders::where('courses_orders.user_id',$request->input('login_user'))->where('courses_orders.order_status',1);
+            $sql = $sql->where('courses.is_good',1)
+                ->where('courses.is_publish',1)
+                ->where('courses.is_del',0)
+                ->leftJoin('courses','courses.course_id','courses_orders.course_id');
+//            $sql = Users_courses_relation::where('courses_users_relaction.user_id',$request->input('login_user'))->where('courses.is_good',1)->where('courses.is_publish',1)
+//                ->leftJoin('courses','courses.course_id','courses_users_relaction.course_id');
             $total = $sql->count();
-            $result = $sql->orderBy('courses_users_relaction.created_at','desc')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_users_relaction.created_at','courses.is_oa','courses.coin_price','courses.now_price','courses.is_publish')
+            $list = $sql->orderBy('courses_orders.created_at','desc')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.cover)  as cover'),'courses.opened_at','courses.closed_at','courses_orders.created_at','courses.is_oa','courses.coin_price','courses.now_price','courses.is_publish',DB::raw('CONCAT("'.config('C.DOMAIN').'",jl_courses.img_list)  as img_list'),'courses.can_talk','courses.is_live','courses.status')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
-            foreach ($result as $key=>$value){
+            foreach ($list as $key=>$value){
                 //计算课程状态
                 $now = time();
                 if($now<=$value['closed_at'] && $now>=$value['opened_at']){
                     //课程正在直播
-                    $result[$key]['status']=1;
+                    $list[$key]['status']=1;
                 }else if($now<$value['opened_at']){
                     //未开始
-                    $result[$key]['status']=0;
+                    $list[$key]['status']=0;
                 }else if($now>$value['closed_at']){
                     //已经结束
-                    $result[$key]['status']=2;
-                }else{
-                    //未知
-                    $result[$key]['status']=-1;
+                    $list[$key]['status']=2;
                 }
-                $result[$key]['is_online']=0;
+                if($value['is_live']==1){
+                    $list[$key]['is_online']=1;
+                }else{
+                    $list[$key]['is_online']=0;
+                }
+                $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+                $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
             }
-            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
+            $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         }else{
             $code = array('dec'=>$this->client_err);
         }
@@ -1136,32 +1388,38 @@ class CoursesController extends Controller{
      * @return \Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response
      */
     public function get_good_courses(Request $request){
-            $page_index = $request->input('page_index')??1;//页码
-            $page_number = $request->input('page_number')??10;//每页显示
-            $sql = Courses::where('status',1)->where('is_good',1)->where('is_publish',1);
-            $total = $sql->count();
-            $result = $sql->orderBy('opened_at','desc')->orderBy('created_at','desc')
-                ->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'opened_at','closed_at','created_at','is_oa','coin_price','now_price')
+        $page_index = $request->input('page_index')??1;//页码
+        $page_number = $request->input('page_number')??10;//每页显示
+        $sql = Courses::where('status',1)
+            ->where('is_good',1)
+            ->where('is_publish',1)
+            ->where('is_del',0);
+        $total = $sql->count();
+        $list = $sql->orderBy('opened_at','desc')->orderBy('created_at','desc')
+                ->select('course_id','title','description','lecturer_name',DB::raw('CONCAT("'.config('C.DOMAIN').'",cover)  as cover'),'opened_at','closed_at','created_at','is_oa','coin_price','now_price','is_live',DB::raw('CONCAT("'.config('C.DOMAIN').'",img_list)  as img_list'),'can_talk','courses.status')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
-            foreach ($result as $key=>$value){
-                //计算课程状态
-                $now = time();
-                if($now<=$value['closed_at'] && $now>=$value['opened_at']){
-                    //课程正在直播
-                    $result[$key]['status']=1;
-                }else if($now<$value['opened_at']){
-                    //未开始
-                    $result[$key]['status']=0;
-                }else if($now>$value['closed_at']){
-                    //已经结束
-                    $result[$key]['status']=2;
-                }else{
-                    //未知
-                    $result[$key]['status']=-1;
-                }
-                $result[$key]['is_online']=0;
+        foreach ($list as $key=>$value){
+            //计算课程状态
+            $now = time();
+            if($now<=$value['closed_at'] && $now>=$value['opened_at']){
+                //课程正在直播
+                $list[$key]['status']=1;
+            }else if($now<$value['opened_at']){
+                //未开始
+                $list[$key]['status']=0;
+            }else if($now>$value['closed_at']){
+                //已经结束
+                $list[$key]['status']=2;
             }
-            $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
+            if($value['is_live']==1){
+                $list[$key]['is_online']=1;
+            }else{
+                $list[$key]['is_online']=0;
+            }
+            $list[$key]['opened_at_str'] = date('Y-m-d H:i:s',$value['opened_at']);
+            $list[$key]['closed_at_str'] = date('Y-m-d H:i:s',$value['closed_at']);
+        }
+        $code = array('dec' => $this->success, 'data' => $list,'total'=>$total);
         $json_str = json_encode($code);
         $res_json = json_decode(\str_replace(':null', ':""', $json_str));
         return response()->json($res_json);
@@ -1214,9 +1472,9 @@ class CoursesController extends Controller{
             $page_number = $request->input('page_number')??10;//每页显示
             $sql = Foots::where('foots.user_id',$request->input('login_user'));
             $total = $sql->count();
-            $result = $sql->where('courses.status',1)->orderBy('foots.in_time','desc')
+            $result = $sql->where('is_publish',1)->orderBy('foots.in_time','desc')
                 ->leftJoin('courses','courses.course_id','foots.course_id')
-                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','foots.in_time')
+                ->select('courses.course_id','courses.title','courses.description','courses.lecturer_name','courses.cover','courses.opened_at','courses.closed_at','foots.in_time','courses.status')
                 ->skip(($page_index - 1) * $page_number)->take($page_number)->get()->toArray();
             $code = array('dec' => $this->success, 'data' => $result,'total'=>$total);
 //            return response()->json($code);

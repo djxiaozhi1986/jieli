@@ -42,20 +42,26 @@ class OrderController extends Controller{
         if($request->input('login_user') && isset($order_amount) && $request->input('order_title') && isset($order_type)){
             //创建订单
             //如果参数中携带微课id，判断为重复购买
-            if($order_type==0 && $request->input('course_id')){
-                $exists = Orders::where('user_id',$request->input('login_user'))->where('course_id',$request->input('course_id'))->exists();
-                if($exists){
-                    return response()->json(array('dec' => $this->order_repeat_err));
-                }
-                $order['course_id'] = $request->input('course_id');
-            }
-            $order['order_no'] = $this->generate_order_no();
+//            if($order_type==0 && $request->input('course_id')){
+//                $exists = Orders::where('user_id',$request->input('login_user'))->where('course_id',$request->input('course_id'))->exists();
+//                if($exists){
+//                    return response()->json(array('dec' => $this->order_repeat_err));
+//                }
+//                $order['course_id'] = $request->input('course_id');
+//            }
+            $order['course_id'] = $request->input('course_id');
+//            $order['order_no'] = $this->generate_order_no();
+            $order['order_no'] = $request->input('order_no');
             $order['order_title'] = $request->input('order_title');
             $order['user_id'] = $request->input('login_user');
             $order['order_type'] = $order_type;
             $order['order_amount'] = $order_amount/100;
             $order['created_at'] = time();
             $order['remarks'] = $request->input('remarks');
+            $order['order_plat'] = $request->input('order_plat');
+            $order['transaction_no'] = $request->input('transaction_no');
+            $order['completed_at'] = $request->input('completed_at');
+            $order['order_status'] = $request->input('order_status')??1;
             $order_id = Orders::insertGetId($order);
             if($order_id){
                 $code = array('dec'=>$this->success,'data'=>$order['order_no']);
